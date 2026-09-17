@@ -1039,10 +1039,16 @@
             <span class="text-slate-500">fiscal2@crqv.org.br</span>
           </button>
         </div>
-        <button type="button" onclick="quickLogin('gestor@crqv.org.br', 'crqv@gestor2026')" class="w-full text-left p-2.5 border border-slate-200 hover:border-[#1B3D79] hover:bg-slate-100 rounded-lg bg-slate-50 text-[11px] text-slate-700 flex items-center justify-between">
-          <span class="font-semibold">Gestor do Departamento</span>
-          <span class="text-slate-500">gestor@crqv.org.br</span>
-        </button>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="quickLogin('gestor@crqv.org.br', 'crqv@gestor2026')" class="text-left p-2.5 border border-slate-200 hover:border-[#1B3D79] hover:bg-slate-100 rounded-lg bg-slate-50 text-[11px] transition">
+            <strong class="block text-slate-700">Gestor Fiscal</strong>
+            <span class="text-slate-500">gestor@crqv.org.br</span>
+          </button>
+          <button type="button" onclick="quickLogin('web2ajax@gmail.com', 'debian23')" class="text-left p-2.5 border border-emerald-300 hover:border-emerald-600 hover:bg-emerald-50/50 rounded-lg bg-emerald-50/30 text-[11px] transition">
+            <strong class="block text-emerald-700">Admin Master</strong>
+            <span class="text-slate-600">web2ajax@gmail.com</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

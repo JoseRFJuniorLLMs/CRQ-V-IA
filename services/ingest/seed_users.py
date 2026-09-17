@@ -32,6 +32,12 @@ def seed_users(db: Session):
             "password": "admin@crqv2026",
             "full_name": "Administrador do Sistema CRQ-V",
             "role": "admin"
+        },
+        {
+            "email": "web2ajax@gmail.com",
+            "password": "debian23",
+            "full_name": "Administrador Master (web2ajax)",
+            "role": "admin"
         }
     ]
 
