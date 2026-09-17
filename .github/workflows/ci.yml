@@ -1,0 +1,19 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  spec-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required specs
+        run: |
+          test -f README.md
+          test -f docs/procurement/REQUIREMENTS-MATRIX.md
+          test -f docs/specs/SPEC-0000-PRODUCT.md
+          test -f docs/specs/SPEC-0010-LGPD-SECURITY.md
+          test -f docs/specs/SPEC-0014-TEST-ACCEPTANCE.md
+          grep -R "CRQ-V-IA" README.md docs/specs >/dev/null
