@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Optional
+import math
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from apps.api.core.database import get_db
@@ -64,9 +65,11 @@ def create_list(
         items_count=0
     )
 
-@router.get("/{list_id}/items", response_model=List[SavedListItemResponse])
+@router.get("/{list_id}/items")
 def get_list_items(
     list_id: int,
+    page: Optional[int] = None,
+    page_size: int = 10,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -74,42 +77,59 @@ def get_list_items(
     if not saved_list:
         raise HTTPException(status_code=404, detail="Lista de fiscalização não encontrada")
 
+    items_query = db.query(SavedListItem).filter(SavedListItem.list_id == list_id).order_by(SavedListItem.id.asc())
+    total = items_query.count()
+
+    if page is not None:
+        total_pages = max(1, math.ceil(total / page_size))
+        db_items = items_query.offset((page - 1) * page_size).limit(page_size).all()
+    else:
+        total_pages = 1
+        db_items = items_query.all()
+
     results = []
-    for item in saved_list.items:
+    for item in db_items:
         est = item.establishment
         prospect_dto = None
         if est:
-            prospect_dto = ProspectListItem(
-                id=est.id,
-                cnpj=est.cnpj,
-                legal_name=est.company.legal_name,
-                trade_name=est.trade_name,
-                branch_type=est.branch_type,
-                registration_status=est.registration_status,
-                primary_cnae=est.primary_cnae,
-                city=est.city,
-                state=est.state,
-                company_size=est.company.company_size,
-                capital_social=est.company.capital_social,
-                chemical_score=est.chemical_score,
-                cfq_tier=est.cfq_tier,
-                cfq_rationale=est.cfq_rationale,
-                crq_status=est.crq_status,
-                opening_date=est.opening_date
-            )
-        results.append(
-            SavedListItemResponse(
-                id=item.id,
-                list_id=item.list_id,
-                establishment_id=item.establishment_id,
-                fiscal_status=item.fiscal_status,
-                priority=item.priority,
-                notes=item.notes,
-                added_at=item.added_at,
-                updated_at=item.updated_at,
-                establishment=prospect_dto
-            )
-        )
+            prospect_dto = {
+                "id": est.id,
+                "cnpj": est.cnpj,
+                "legal_name": est.company.legal_name,
+                "trade_name": est.trade_name,
+                "branch_type": est.branch_type,
+                "registration_status": est.registration_status,
+                "primary_cnae": est.primary_cnae,
+                "city": est.city,
+                "state": est.state,
+                "company_size": est.company.company_size,
+                "capital_social": est.company.capital_social,
+                "chemical_score": est.chemical_score,
+                "cfq_tier": est.cfq_tier,
+                "cfq_rationale": est.cfq_rationale,
+                "crq_status": est.crq_status,
+                "opening_date": str(est.opening_date) if est.opening_date else None
+            }
+        results.append({
+            "id": item.id,
+            "list_id": item.list_id,
+            "establishment_id": item.establishment_id,
+            "fiscal_status": item.fiscal_status,
+            "priority": item.priority,
+            "notes": item.notes,
+            "added_at": item.added_at.isoformat() if item.added_at else None,
+            "updated_at": item.updated_at.isoformat() if item.updated_at else None,
+            "establishment": prospect_dto
+        })
+
+    if page is not None:
+        return {
+            "items": results,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages
+        }
     return results
 
 @router.post("/{list_id}/items", response_model=SavedListItemResponse)

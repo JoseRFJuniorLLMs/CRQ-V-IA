@@ -137,3 +137,45 @@ def test_dashboard_stats():
     assert data["total_establishments_rs"] > 0
     assert len(data["by_city"]) > 0
     assert len(data["by_cnae"]) > 0
+
+def test_user_profile_and_password():
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Consulta perfil /me
+    me_resp = client.get("/api/auth/me", headers=headers)
+    assert me_resp.status_code == 200
+    assert me_resp.json()["email"] == "fiscal1@crqv.org.br"
+
+    # Atualiza perfil /me
+    upd_resp = client.put("/api/auth/me", json={"full_name": "Agente Fiscal CRQ-V (Posto 01 Atualizado)"}, headers=headers)
+    assert upd_resp.status_code == 200
+    assert upd_resp.json()["full_name"] == "Agente Fiscal CRQ-V (Posto 01 Atualizado)"
+
+    # Restaura nome
+    client.put("/api/auth/me", json={"full_name": "Agente Fiscal CRQ-V (Posto 01)"}, headers=headers)
+
+def test_paginated_users_and_audit():
+    login_resp = client.post("/api/auth/login", json={"email": "admin@crqv.org.br", "password": "admin@crqv2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Tabela paginada de usuários
+    users_resp = client.get("/api/auth/users?page=1&page_size=2", headers=headers)
+    assert users_resp.status_code == 200
+    u_data = users_resp.json()
+    assert "items" in u_data
+    assert u_data["total"] >= 4
+    assert len(u_data["items"]) == 2
+    assert u_data["page"] == 1
+    assert u_data["total_pages"] >= 2
+
+    # Tabela paginada de auditoria
+    audit_resp = client.get("/api/audit?page=1&page_size=5", headers=headers)
+    assert audit_resp.status_code == 200
+    a_data = audit_resp.json()
+    assert "items" in a_data
+    assert a_data["total"] > 0
+    assert len(a_data["items"]) <= 5
+    assert a_data["page"] == 1

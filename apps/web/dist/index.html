@@ -55,6 +55,10 @@
           <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
           <span>Auditoria LGPD</span>
         </button>
+        <button onclick="switchTab('profile')" id="tab-btn-profile" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
+          <i data-lucide="user-cog" class="w-4 h-4 text-emerald-400"></i>
+          <span>Perfil & Usuários</span>
+        </button>
         <button onclick="switchTab('help')" id="tab-btn-help" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
           <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i>
           <span>Manual & Suporte</span>
@@ -70,11 +74,14 @@
         </div>
 
         <div id="user-info-box" class="hidden items-center space-x-2 border-l border-slate-700 pl-3">
-          <div class="text-right">
-            <div id="user-name" class="text-xs font-semibold text-slate-200 truncate max-w-[140px]">Fiscal de Campo</div>
-            <div id="user-role" class="text-[10px] text-emerald-400 font-mono uppercase">Fiscal CRQ-V</div>
+          <div onclick="switchTab('profile')" class="flex items-center space-x-2 cursor-pointer group" title="Clique para ver Meu Perfil e Gestão de Usuários">
+            <div id="user-avatar" class="w-7 h-7 rounded-full bg-emerald-700 text-white font-bold text-xs flex items-center justify-center group-hover:bg-emerald-600 transition shadow">F</div>
+            <div class="text-right">
+              <div id="user-name" class="text-xs font-semibold text-slate-200 truncate max-w-[140px] group-hover:text-emerald-300 transition">Fiscal de Campo</div>
+              <div id="user-role" class="text-[10px] text-emerald-400 font-mono uppercase">Fiscal CRQ-V</div>
+            </div>
           </div>
-          <button onclick="logout()" title="Encerrar Sessão" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition">
+          <button onclick="logout()" title="Encerrar Sessão" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition ml-1">
             <i data-lucide="log-out" class="w-4 h-4"></i>
           </button>
         </div>
@@ -247,12 +254,32 @@
               </table>
             </div>
 
-            <!-- PAGINAÇÃO -->
-            <div class="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between">
-              <span id="page-info" class="text-xs text-slate-500">Página 1 de 1</span>
-              <div class="flex space-x-1">
-                <button id="btn-prev-page" onclick="changePage(-1)" class="px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40" disabled>Anterior</button>
-                <button id="btn-next-page" onclick="changePage(1)" class="px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40" disabled>Próxima</button>
+            <!-- PAGINAÇÃO COMPLETA -->
+            <div class="bg-slate-50 border-t border-slate-200 px-5 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div class="text-slate-600">
+                <span>Exibindo </span>
+                <strong id="prospects-range" class="font-bold text-slate-800">0 - 0</strong>
+                <span> de </span>
+                <strong id="prospects-total-records" class="font-bold text-slate-800">0</strong>
+                <span> empresas no RS</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-1.5 text-slate-600">
+                  <span>Itens por pág:</span>
+                  <select id="prospects-page-size" onchange="changeProspectsPageSize(this.value)" class="text-xs bg-white border border-slate-300 rounded px-2 py-1 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+                    <option value="10">10</option>
+                    <option value="15" selected>15</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                  </select>
+                </div>
+                <div class="flex items-center space-x-1" id="prospects-pagination-controls">
+                  <button id="btn-first-page" onclick="goToProspectsPage(1)" title="Primeira Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">«</button>
+                  <button id="btn-prev-page" onclick="changePage(-1)" title="Página Anterior" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">‹</button>
+                  <div id="prospects-page-nums" class="flex items-center space-x-1"></div>
+                  <button id="btn-next-page" onclick="changePage(1)" title="Próxima Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">›</button>
+                  <button id="btn-last-page" onclick="goToProspectsPage(prospectsTotalPages)" title="Última Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">»</button>
+                </div>
               </div>
             </div>
           </div>
@@ -295,8 +322,54 @@
               <span>Baixar Roteiro XLSX</span>
             </button>
           </div>
-          <div id="active-list-items" class="divide-y divide-slate-100 space-y-2">
-            <p class="text-xs text-slate-400 py-6 text-center">Nenhum roteiro selecionado.</p>
+          <div class="overflow-hidden border border-slate-200 rounded-xl">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+                  <tr>
+                    <th class="py-3 px-3">Empresa / Razão Social</th>
+                    <th class="py-3 px-3">Localização (RS)</th>
+                    <th class="py-3 px-3">CNAE Principal</th>
+                    <th class="py-3 px-2 text-center">Prioridade</th>
+                    <th class="py-3 px-2 text-center">Status Fiscal</th>
+                    <th class="py-3 px-3">Observações</th>
+                    <th class="py-3 px-3 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="list-items-table-body" class="divide-y divide-slate-100">
+                  <tr>
+                    <td colspan="7" class="text-center py-6 text-slate-400">Selecione um roteiro ao lado para visualizar os itens.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- BARRA DE PAGINAÇÃO DA LISTA -->
+            <div id="list-items-pagination-bar" class="bg-slate-50 border-t border-slate-200 px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+              <div class="text-slate-600">
+                <span>Exibindo </span>
+                <strong id="list-items-range" class="font-bold text-slate-800">0 - 0</strong>
+                <span> de </span>
+                <strong id="list-items-total" class="font-bold text-slate-800">0</strong>
+                <span> empresas no roteiro</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-1 text-slate-600">
+                  <span>Itens:</span>
+                  <select id="list-items-page-size" onchange="changeListItemsPageSize(this.value)" class="text-xs bg-white border border-slate-300 rounded px-1.5 py-1 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                  </select>
+                </div>
+                <div class="flex items-center space-x-1" id="list-items-pagination-controls">
+                  <button id="btn-list-first" onclick="goToListItemsPage(1)" title="Primeira" class="px-2 py-0.5 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">«</button>
+                  <button id="btn-list-prev" onclick="changeListItemsPage(-1)" title="Anterior" class="px-2 py-0.5 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">‹</button>
+                  <div id="list-items-page-nums" class="flex items-center space-x-1"></div>
+                  <button id="btn-list-next" onclick="changeListItemsPage(1)" title="Próxima" class="px-2 py-0.5 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">›</button>
+                  <button id="btn-list-last" onclick="goToListItemsPage(listItemsTotalPages)" title="Última" class="px-2 py-0.5 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">»</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -361,24 +434,273 @@
         <p class="text-sm text-slate-500 mt-1">Rastreabilidade completa de todas as consultas cadastrais, pesquisas de fiscais e exportações de relatórios.</p>
       </div>
 
+      <!-- FILTROS DE AUDITORIA -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="font-semibold text-slate-700">Filtro por Ação:</label>
+          <select id="audit-filter-action" onchange="loadAuditLogs(1)" class="border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-xs text-slate-700 focus:ring-1 focus:ring-emerald-500">
+            <option value="">Todas as Ações</option>
+            <option value="LOGIN">LOGIN (Autenticação)</option>
+            <option value="UPDATE_PROFILE">UPDATE_PROFILE (Perfil)</option>
+            <option value="CHANGE_PASSWORD">CHANGE_PASSWORD (Senha)</option>
+            <option value="LIVE_CHECK">LIVE_CHECK (Consulta RFB)</option>
+            <option value="EXPORT_PROSPECTS_CSV">EXPORT_PROSPECTS_CSV</option>
+            <option value="EXPORT_PROSPECTS_XLSX">EXPORT_PROSPECTS_XLSX</option>
+            <option value="CREATE_SAVED_LIST">CREATE_SAVED_LIST</option>
+            <option value="EXPORT_SAVED_LIST_XLSX">EXPORT_SAVED_LIST_XLSX</option>
+            <option value="CREATE_USER">CREATE_USER</option>
+            <option value="UPDATE_USER">UPDATE_USER</option>
+          </select>
+
+          <input type="text" id="audit-filter-q" oninput="debounceAuditSearch()" placeholder="Buscar usuário, CNPJ ou IP..." class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 w-64 focus:ring-1 focus:ring-emerald-500">
+        </div>
+        <button onclick="resetAuditFilters()" class="text-xs text-slate-500 hover:text-emerald-700 underline">Limpar Filtros</button>
+      </div>
+
+      <!-- TABELA PAGINADA DE AUDITORIA -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <table class="w-full text-left text-xs text-slate-600">
-          <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
-            <tr>
-              <th class="py-3 px-4">Data / Hora</th>
-              <th class="py-3 px-3">Usuário Fiscal</th>
-              <th class="py-3 px-3">Ação Executada</th>
-              <th class="py-3 px-3">Alvo / Registro</th>
-              <th class="py-3 px-3">Endereço IP</th>
-              <th class="py-3 px-4">Detalhes</th>
-            </tr>
-          </thead>
-          <tbody id="audit-table-body" class="divide-y divide-slate-100">
-            <tr>
-              <td colspan="6" class="text-center py-6 text-slate-400">Carregando trilha de auditoria...</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+              <tr>
+                <th class="py-3 px-4">Data / Hora</th>
+                <th class="py-3 px-3">Usuário Fiscal</th>
+                <th class="py-3 px-3">Ação Executada</th>
+                <th class="py-3 px-3">Alvo / Registro</th>
+                <th class="py-3 px-3">Endereço IP</th>
+                <th class="py-3 px-4">Detalhes Técnicos</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table-body" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="6" class="text-center py-6 text-slate-400">Carregando trilha de auditoria...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- BARRA DE PAGINAÇÃO DE AUDITORIA -->
+        <div class="bg-slate-50 border-t border-slate-200 px-5 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div class="text-slate-600">
+            <span>Exibindo </span>
+            <strong id="audit-range" class="font-bold text-slate-800">0 - 0</strong>
+            <span> de </span>
+            <strong id="audit-total" class="font-bold text-slate-800">0</strong>
+            <span> eventos de auditoria</span>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-1.5 text-slate-600">
+              <span>Por página:</span>
+              <select id="audit-page-size" onchange="changeAuditPageSize(this.value)" class="text-xs bg-white border border-slate-300 rounded px-2 py-1 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+                <option value="10">10</option>
+                <option value="15" selected>15</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div class="flex items-center space-x-1" id="audit-pagination-controls">
+              <button id="btn-audit-first" onclick="goToAuditPage(1)" title="Primeira Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">«</button>
+              <button id="btn-audit-prev" onclick="changeAuditPage(-1)" title="Página Anterior" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">‹</button>
+              <div id="audit-page-nums" class="flex items-center space-x-1"></div>
+              <button id="btn-audit-next" onclick="changeAuditPage(1)" title="Próxima Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">›</button>
+              <button id="btn-audit-last" onclick="goToAuditPage(auditTotalPages)" title="Última Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">»</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ABA DE PERFIL DO USUÁRIO & GESTÃO DE ACESSOS -->
+    <section id="view-profile" class="space-y-6 hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+            <i data-lucide="user-cog" class="w-5 h-5 text-emerald-600"></i>
+            <span>Perfil do Usuário e Gestão de Acessos CRQ-V</span>
+          </h1>
+          <p class="text-sm text-slate-500 mt-1">Controle de identidade funcional, credenciais seguras e gestão de perfis regulatórios para fiscalização.</p>
+        </div>
+        <div class="inline-flex items-center space-x-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs text-emerald-900 font-medium">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-600"></i>
+          <span>Em conformidade com TR 1.2.3.4 (Mín. 2 Usuários Simultâneos)</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- COLUNA 1: MEU PERFIL (1 COLUNA) -->
+        <div class="space-y-6">
+          <!-- CARD DE IDENTIDADE DO USUÁRIO -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+            <div class="flex items-center space-x-4 border-b border-slate-100 pb-4">
+              <div id="profile-card-avatar" class="w-14 h-14 rounded-2xl bg-emerald-700 text-white font-black text-xl flex items-center justify-center shadow-md">
+                F
+              </div>
+              <div>
+                <h3 id="profile-card-name" class="font-bold text-slate-900 text-base">Agente Fiscal</h3>
+                <p id="profile-card-email" class="text-xs text-slate-500 font-mono">fiscal1@crqv.org.br</p>
+                <div class="flex items-center space-x-1.5 mt-1">
+                  <span id="profile-card-role-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">FISCAL CRQ-V</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Ativo</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between py-1 border-b border-slate-50">
+                <span class="text-slate-400">Matrícula Funcional:</span>
+                <span id="profile-card-matricula" class="font-mono font-semibold text-slate-700">CRQV-2026-001</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-50">
+                <span class="text-slate-400">Jurisdição / Lotação:</span>
+                <span class="font-medium text-slate-700">5ª Região (Rio Grande do Sul)</span>
+              </div>
+              <div class="flex justify-between py-1 border-b border-slate-50">
+                <span class="text-slate-400">Data de Cadastro:</span>
+                <span id="profile-card-created" class="text-slate-600">--</span>
+              </div>
+              <div class="flex justify-between py-1">
+                <span class="text-slate-400">Último Acesso:</span>
+                <span id="profile-card-last-login" class="text-slate-600 font-mono">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FORMULÁRIO: EDITAR DADOS PESSOAIS -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center space-x-1.5">
+              <i data-lucide="edit-3" class="w-4 h-4 text-emerald-600"></i>
+              <span>Atualizar Dados do Perfil</span>
+            </h4>
+            <form onsubmit="handleUpdateProfile(event)" class="space-y-3 text-xs">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nome Completo</label>
+                <input type="text" id="input-profile-fullname" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-400 mb-1">E-mail Institucional (Bloqueado)</label>
+                <input type="email" id="input-profile-email" disabled class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed">
+              </div>
+              <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg transition shadow-sm">
+                Salvar Alterações
+              </button>
+            </form>
+          </div>
+
+          <!-- FORMULÁRIO: ALTERAR SENHA -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center space-x-1.5">
+              <i data-lucide="key" class="w-4 h-4 text-emerald-600"></i>
+              <span>Segurança & Alteração de Senha</span>
+            </h4>
+            <form onsubmit="handleChangePassword(event)" class="space-y-3 text-xs">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Senha Atual</label>
+                <input type="password" id="input-current-password" required placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Nova Senha (Mín. 6 dígitos)</label>
+                <input type="password" id="input-new-password" required minlength="6" placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">Confirmar Nova Senha</label>
+                <input type="password" id="input-confirm-password" required minlength="6" placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg transition shadow-sm">
+                Atualizar Senha
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- COLUNA 2: GESTÃO DE USUÁRIOS E PERFIS DO SISTEMA (2 COLUNAS) -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Quadro de Usuários e Perfis Cadastrados</h3>
+              <p class="text-xs text-slate-500">Agentes autorizados para operação do sistema de fiscalização química no RS.</p>
+            </div>
+            <button onclick="openCreateUserModal()" class="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg shadow-sm transition">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+              <span>Novo Usuário</span>
+            </button>
+          </div>
+
+          <!-- FILTRO DE USUÁRIOS -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="text" id="users-filter-q" oninput="debounceUserSearch()" placeholder="Buscar por nome ou e-mail..." class="border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 w-64 focus:ring-1 focus:ring-emerald-500">
+              
+              <select id="users-filter-role" onchange="loadUsersTable(1)" class="border border-slate-300 rounded-lg px-2.5 py-1.5 bg-white text-xs text-slate-700">
+                <option value="">Todos os Perfis</option>
+                <option value="fiscal">Fiscal de Campo</option>
+                <option value="gestor">Gestor de Fiscalização</option>
+                <option value="admin">Administrador Geral</option>
+              </select>
+            </div>
+            <button onclick="resetUserFilters()" class="text-xs text-slate-500 hover:text-emerald-700 underline">Limpar</button>
+          </div>
+
+          <!-- TABELA PAGINADA DE USUÁRIOS -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+                  <tr>
+                    <th class="py-3 px-4">Nome / E-mail Institucional</th>
+                    <th class="py-3 px-3">Perfil / Função</th>
+                    <th class="py-3 px-3 text-center">Status</th>
+                    <th class="py-3 px-3">Último Acesso</th>
+                    <th class="py-3 px-4 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="users-table-body" class="divide-y divide-slate-100">
+                  <tr>
+                    <td colspan="5" class="text-center py-6 text-slate-400">Carregando quadro de usuários...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- BARRA DE PAGINAÇÃO DE USUÁRIOS -->
+            <div class="bg-slate-50 border-t border-slate-200 px-5 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+              <div class="text-slate-600">
+                <span>Exibindo </span>
+                <strong id="users-range" class="font-bold text-slate-800">0 - 0</strong>
+                <span> de </span>
+                <strong id="users-total" class="font-bold text-slate-800">0</strong>
+                <span> usuários cadastrados</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-1.5 text-slate-600">
+                  <span>Por página:</span>
+                  <select id="users-page-size" onchange="changeUsersPageSize(this.value)" class="text-xs bg-white border border-slate-300 rounded px-2 py-1 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                  </select>
+                </div>
+                <div class="flex items-center space-x-1" id="users-pagination-controls">
+                  <button id="btn-users-first" onclick="goToUsersPage(1)" title="Primeira Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">«</button>
+                  <button id="btn-users-prev" onclick="changeUsersPage(-1)" title="Página Anterior" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">‹</button>
+                  <div id="users-page-nums" class="flex items-center space-x-1"></div>
+                  <button id="btn-users-next" onclick="changeUsersPage(1)" title="Próxima Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">›</button>
+                  <button id="btn-users-last" onclick="goToUsersPage(usersTotalPages)" title="Última Página" class="px-2.5 py-1 border border-slate-300 rounded bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-30">»</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD DE CONFORMIDADE DE ACESSOS SIMULTÂNEOS -->
+          <div class="bg-indigo-50/60 border border-indigo-200 rounded-xl p-4 flex items-start space-x-3 text-xs text-indigo-950">
+            <i data-lucide="info" class="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <strong class="font-bold block">Garantia Regulatória de 2 Acessos Simultâneos (TR 1.2.3.4):</strong>
+              <p class="text-indigo-800 mt-0.5">
+                Os usuários fiscais cadastrados (`fiscal1@crqv.org.br` e `fiscal2@crqv.org.br`) possuem permissão concorrente independente. Cada um pode realizar triagens, exportações e montagem de roteiros simultaneamente sem término forçado de sessão.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -636,6 +958,96 @@
     </div>
   </div>
 
+  <!-- MODAL: CADASTRAR NOVO USUÁRIO -->
+  <div id="modal-create-user" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+          <i data-lucide="user-plus" class="w-4 h-4 text-emerald-600"></i>
+          <span>Cadastrar Novo Usuário CRQ-V</span>
+        </h3>
+        <button onclick="closeCreateUserModal()" class="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+      </div>
+      <form onsubmit="submitCreateUser(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nome Completo</label>
+          <input type="text" id="create-user-name" required placeholder="Ex: Dr. Roberto Alcantara" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">E-mail Institucional</label>
+          <input type="email" id="create-user-email" required placeholder="nome@crqv.org.br" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Perfil Regulatório</label>
+            <select id="create-user-role" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="fiscal">Fiscal de Campo</option>
+              <option value="gestor">Gestor de Fiscalização</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Senha Inicial</label>
+            <input type="password" id="create-user-password" required minlength="6" placeholder="••••••••" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+        </div>
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeCreateUserModal()" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200">Cancelar</button>
+          <button type="submit" class="px-4 py-1.5 text-xs text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold shadow">Cadastrar Usuário</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR USUÁRIO -->
+  <div id="modal-edit-user" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-sm flex items-center space-x-2">
+          <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+          <span>Editar Usuário / Perfil</span>
+        </h3>
+        <button onclick="closeEditUserModal()" class="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+      </div>
+      <form onsubmit="submitEditUser(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="edit-user-id">
+        <div>
+          <label class="block font-semibold text-slate-400 mb-1">E-mail Institucional</label>
+          <input type="email" id="edit-user-email" disabled class="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nome Completo</label>
+          <input type="text" id="edit-user-name" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Perfil Regulatório</label>
+            <select id="edit-user-role" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="fiscal">Fiscal de Campo</option>
+              <option value="gestor">Gestor de Fiscalização</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Situação Cadastral</label>
+            <select id="edit-user-status" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="true">Ativo</option>
+              <option value="false">Inativo / Bloqueado</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Redefinir Senha (Opcional)</label>
+          <input type="password" id="edit-user-password" minlength="6" placeholder="Deixe em branco para não alterar" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeEditUserModal()" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200">Cancelar</button>
+          <button type="submit" class="px-4 py-1.5 text-xs text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg font-semibold shadow">Salvar Modificações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT PRINCIPAL DA APLICAÇÃO -->
   <script>
     const API_BASE = window.location.origin.includes('localhost:3000') ? 'http://localhost:8000/api' : '/api';
@@ -794,27 +1206,37 @@
 
     // NAVEGAÇÃO DE ABAS
     function switchTab(tabId) {
-      ['prospects', 'lists', 'dashboard', 'audit', 'help'].forEach(t => {
+      ['prospects', 'lists', 'dashboard', 'audit', 'profile', 'help'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const btn = document.getElementById(`tab-btn-${t}`);
-        if (t === tabId) {
-          view.classList.remove('hidden');
-          btn.classList.add('bg-slate-800', 'text-white');
-          btn.classList.remove('text-slate-300');
-        } else {
-          view.classList.add('hidden');
-          btn.classList.remove('bg-slate-800', 'text-white');
-          btn.classList.add('text-slate-300');
+        if (view && btn) {
+          if (t === tabId) {
+            view.classList.remove('hidden');
+            btn.classList.add('bg-slate-800', 'text-white');
+            btn.classList.remove('text-slate-300');
+          } else {
+            view.classList.add('hidden');
+            btn.classList.remove('bg-slate-800', 'text-white');
+            btn.classList.add('text-slate-300');
+          }
         }
       });
       lucide.createIcons();
 
       if (tabId === 'lists') loadSavedLists();
       if (tabId === 'dashboard') loadDashboardStats();
-      if (tabId === 'audit') loadAuditLogs();
+      if (tabId === 'audit') loadAuditLogs(1);
+      if (tabId === 'profile') {
+        loadProfileData();
+        loadUsersTable(1);
+      }
     }
 
-    // BUSCA DE PROSPECTOS
+    // BUSCA DE PROSPECTOS COM PAGINAÇÃO COMPLETA
+    let prospectsCurrentPage = 1;
+    let prospectsPageSize = 15;
+    let prospectsTotalPages = 1;
+
     function debounceSearch() {
       clearTimeout(searchDebounceTimer);
       searchDebounceTimer = setTimeout(() => {
@@ -834,8 +1256,48 @@
       loadProspects(1);
     }
 
+    function changeProspectsPageSize(val) {
+      prospectsPageSize = parseInt(val) || 15;
+      loadProspects(1);
+    }
+
+    function goToProspectsPage(page) {
+      if (page < 1 || page > prospectsTotalPages) return;
+      loadProspects(page);
+    }
+
+    function changePage(delta) {
+      goToProspectsPage(prospectsCurrentPage + delta);
+    }
+
+    function renderPaginationButtons(containerId, currentPage, totalPages, goToFuncStr) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, currentPage + 2);
+
+      if (endPage - startPage < 4) {
+        if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
+        else if (endPage === totalPages) startPage = Math.max(1, endPage - 4);
+      }
+
+      for (let p = startPage; p <= endPage; p++) {
+        const btn = document.createElement('button');
+        btn.innerText = p;
+        btn.className = `px-2.5 py-1 border rounded text-xs transition ${
+          p === currentPage
+            ? 'bg-emerald-600 text-white font-bold border-emerald-600 shadow-sm'
+            : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
+        }`;
+        btn.onclick = () => window[goToFuncStr](p);
+        container.appendChild(btn);
+      }
+    }
+
     async function loadProspects(page = 1) {
-      currentPage = page;
+      prospectsCurrentPage = page;
       const q = document.getElementById('filter-q').value;
       const city = document.getElementById('filter-city').value;
       const tier = document.getElementById('filter-tier').value;
@@ -844,7 +1306,7 @@
       const crq = document.getElementById('filter-crq').value;
       const minScore = document.getElementById('filter-score').value;
 
-      let url = `${API_BASE}/prospects?page=${page}&page_size=15`;
+      let url = `${API_BASE}/prospects?page=${page}&page_size=${prospectsPageSize}`;
       if (q) url += `&q=${encodeURIComponent(q)}`;
       if (city) url += `&city=${encodeURIComponent(city)}`;
       if (tier) url += `&tier=${tier}`;
@@ -865,11 +1327,22 @@
           return;
         }
         const data = await res.json();
-        document.getElementById('prospects-total').innerText = data.total;
-        document.getElementById('page-info').innerText = `Página ${data.page} de ${data.total_pages || 1}`;
+        prospectsTotalPages = data.total_pages || 1;
 
+        // Atualiza contadores
+        document.getElementById('prospects-total').innerText = data.total;
+        document.getElementById('prospects-total-records').innerText = data.total;
+        const from = data.total > 0 ? (data.page - 1) * data.page_size + 1 : 0;
+        const to = Math.min(data.total, data.page * data.page_size);
+        document.getElementById('prospects-range').innerText = `${from} - ${to}`;
+
+        // Atualiza controles de botões
+        document.getElementById('btn-first-page').disabled = data.page <= 1;
         document.getElementById('btn-prev-page').disabled = data.page <= 1;
-        document.getElementById('btn-next-page').disabled = data.page >= data.total_pages;
+        document.getElementById('btn-next-page').disabled = data.page >= prospectsTotalPages;
+        document.getElementById('btn-last-page').disabled = data.page >= prospectsTotalPages;
+
+        renderPaginationButtons('prospects-page-nums', data.page, prospectsTotalPages, 'goToProspectsPage');
 
         if (data.items.length === 0) {
           tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400">Nenhuma empresa encontrada com os filtros selecionados.</td></tr>';
@@ -919,10 +1392,6 @@
       } catch (err) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-red-500">Erro ao carregar dados.</td></tr>';
       }
-    }
-
-    function changePage(delta) {
-      loadProspects(currentPage + delta);
     }
 
     // EXPORTAÇÕES
@@ -1074,6 +1543,10 @@
       } catch(e) {}
     }
 
+    let listItemsCurrentPage = 1;
+    let listItemsPageSize = 5;
+    let listItemsTotalPages = 1;
+
     async function selectActiveList(listId, name, desc) {
       activeListId = listId;
       document.getElementById('active-list-title').innerText = name;
@@ -1081,35 +1554,92 @@
       document.getElementById('btn-export-list').classList.remove('hidden');
 
       loadSavedLists(); // Atualiza highlight
+      loadListItems(1);
+    }
+
+    function changeListItemsPageSize(size) {
+      listItemsPageSize = parseInt(size) || 5;
+      loadListItems(1);
+    }
+
+    function goToListItemsPage(page) {
+      if (page < 1 || page > listItemsTotalPages) return;
+      loadListItems(page);
+    }
+
+    function changeListItemsPage(delta) {
+      goToListItemsPage(listItemsCurrentPage + delta);
+    }
+
+    async function loadListItems(page = 1) {
+      if (!activeListId) return;
+      listItemsCurrentPage = page;
+      const tbody = document.getElementById('list-items-table-body');
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-400">Carregando empresas do roteiro...</td></tr>';
 
       try {
-        const res = await fetch(`${API_BASE}/lists/${listId}/items`, {
+        const res = await fetch(`${API_BASE}/lists/${activeListId}/items?page=${page}&page_size=${listItemsPageSize}`, {
           headers: { 'Authorization': `Bearer ${currentToken}` }
         });
-        const items = await res.json();
-        const container = document.getElementById('active-list-items');
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = data.items || [];
+        listItemsTotalPages = data.total_pages || 1;
+
+        // Atualiza barra de paginação
+        document.getElementById('list-items-total').innerText = data.total;
+        const from = data.total > 0 ? (data.page - 1) * data.page_size + 1 : 0;
+        const to = Math.min(data.total, data.page * data.page_size);
+        document.getElementById('list-items-range').innerText = `${from} - ${to}`;
+
+        document.getElementById('btn-list-first').disabled = data.page <= 1;
+        document.getElementById('btn-list-prev').disabled = data.page <= 1;
+        document.getElementById('btn-list-next').disabled = data.page >= listItemsTotalPages;
+        document.getElementById('btn-list-last').disabled = data.page >= listItemsTotalPages;
+
+        renderPaginationButtons('list-items-page-nums', data.page, listItemsTotalPages, 'goToListItemsPage');
+
         if (items.length === 0) {
-          container.innerHTML = '<p class="text-xs text-slate-400 py-6 text-center">Nenhuma empresa adicionada a este roteiro ainda.</p>';
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-slate-400">Nenhuma empresa adicionada a este roteiro ainda.</td></tr>';
           return;
         }
 
-        container.innerHTML = items.map(item => {
+        tbody.innerHTML = items.map(item => {
           const est = item.establishment;
+          let priorityBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">Baixa</span>';
+          if (item.priority === 'ALTA') priorityBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Alta</span>';
+          if (item.priority === 'MEDIA') priorityBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Média</span>';
+
+          const formattedCnpj = est ? est.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5") : '--';
+
           return `
-            <div class="p-3 flex items-center justify-between hover:bg-slate-50 transition rounded-lg">
-              <div>
-                <div class="font-bold text-slate-800 text-xs">${est ? est.legal_name : 'Empresa ID ' + item.establishment_id}</div>
-                <div class="text-[11px] text-slate-500">${est ? est.city + ' • CNAE: ' + est.primary_cnae : ''}</div>
-                ${item.notes ? `<div class="text-[11px] text-amber-700 mt-0.5">Nota: ${item.notes}</div>` : ''}
-              </div>
-              <div class="flex items-center space-x-2">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">${item.fiscal_status}</span>
-                <button onclick="removeListItem(${listId}, ${item.id})" class="text-red-500 hover:text-red-700 p-1 text-xs">Excluir</button>
-              </div>
-            </div>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-2.5 px-3">
+                <div class="font-bold text-slate-900">${est ? est.legal_name : 'Empresa ID ' + item.establishment_id}</div>
+                ${est && est.trade_name ? `<div class="text-[10px] text-slate-500">${est.trade_name}</div>` : ''}
+              </td>
+              <td class="py-2.5 px-3">
+                <div class="font-mono text-slate-700">${formattedCnpj}</div>
+                <div class="text-[10px] text-slate-500">${est ? est.city + '/RS' : '--'}</div>
+              </td>
+              <td class="py-2.5 px-3 font-mono text-slate-700">${est ? est.primary_cnae : '--'}</td>
+              <td class="py-2.5 px-2 text-center">${priorityBadge}</td>
+              <td class="py-2.5 px-2 text-center">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">${item.fiscal_status}</span>
+              </td>
+              <td class="py-2.5 px-3 text-[11px] text-slate-600 max-w-[150px] truncate" title="${item.notes || ''}">
+                ${item.notes || '<span class="text-slate-400 italic">Sem notas</span>'}
+              </td>
+              <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
+                ${est ? `<button onclick="openCompanyModal('${est.cnpj}')" class="text-emerald-700 hover:text-emerald-900 font-semibold text-xs">Ficha</button>` : ''}
+                <button onclick="removeListItem(${activeListId}, ${item.id})" class="text-red-500 hover:text-red-700 text-xs ml-2">Excluir</button>
+              </td>
+            </tr>
           `;
         }).join('');
-      } catch(e) {}
+      } catch(e) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-red-500">Erro ao carregar itens do roteiro.</td></tr>';
+      }
     }
 
     async function removeListItem(listId, itemId) {
@@ -1119,7 +1649,7 @@
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${currentToken}` }
         });
-        selectActiveList(activeListId, document.getElementById('active-list-title').innerText, document.getElementById('active-list-desc').innerText);
+        loadListItems(listItemsCurrentPage);
         loadSavedLists();
       } catch(e) {}
     }
@@ -1203,6 +1733,7 @@
         if (res.ok) {
           alert('Empresa adicionada ao roteiro com sucesso!');
           document.getElementById('modal-add-to-list').classList.add('hidden');
+          if (activeListId == listId) loadListItems(listItemsCurrentPage);
         } else {
           const err = await res.json();
           alert(err.detail || 'Erro ao adicionar empresa');
@@ -1269,26 +1800,373 @@
       } catch(e) {}
     }
 
-    // AUDITORIA LGPD
-    async function loadAuditLogs() {
+    // AUDITORIA LGPD PAGINADA
+    let auditCurrentPage = 1;
+    let auditPageSize = 15;
+    let auditTotalPages = 1;
+    let auditDebounceTimer = null;
+
+    function debounceAuditSearch() {
+      clearTimeout(auditDebounceTimer);
+      auditDebounceTimer = setTimeout(() => {
+        loadAuditLogs(1);
+      }, 350);
+    }
+
+    function resetAuditFilters() {
+      document.getElementById('audit-filter-action').value = '';
+      document.getElementById('audit-filter-q').value = '';
+      loadAuditLogs(1);
+    }
+
+    function changeAuditPageSize(size) {
+      auditPageSize = parseInt(size) || 15;
+      loadAuditLogs(1);
+    }
+
+    function goToAuditPage(page) {
+      if (page < 1 || page > auditTotalPages) return;
+      loadAuditLogs(page);
+    }
+
+    function changeAuditPage(delta) {
+      goToAuditPage(auditCurrentPage + delta);
+    }
+
+    async function loadAuditLogs(page = 1) {
+      auditCurrentPage = page;
+      const action = document.getElementById('audit-filter-action').value;
+      const q = document.getElementById('audit-filter-q').value;
+
+      let url = `${API_BASE}/audit?page=${page}&page_size=${auditPageSize}`;
+      if (action) url += `&action=${encodeURIComponent(action)}`;
+      if (q) url += `&q=${encodeURIComponent(q)}`;
+
+      const tbody = document.getElementById('audit-table-body');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Carregando trilha de auditoria...</td></tr>';
+
       try {
-        const res = await fetch(`${API_BASE}/audit`, {
+        const res = await fetch(url, {
           headers: { 'Authorization': `Bearer ${currentToken}` }
         });
         if (!res.ok) return;
-        const logs = await res.json();
-        const tbody = document.getElementById('audit-table-body');
-        tbody.innerHTML = logs.map(l => `
+        const data = await res.json();
+        auditTotalPages = data.total_pages || 1;
+
+        // Atualiza contadores
+        document.getElementById('audit-total').innerText = data.total;
+        const from = data.total > 0 ? (data.page - 1) * data.page_size + 1 : 0;
+        const to = Math.min(data.total, data.page * data.page_size);
+        document.getElementById('audit-range').innerText = `${from} - ${to}`;
+
+        // Atualiza botões
+        document.getElementById('btn-audit-first').disabled = data.page <= 1;
+        document.getElementById('btn-audit-prev').disabled = data.page <= 1;
+        document.getElementById('btn-audit-next').disabled = data.page >= auditTotalPages;
+        document.getElementById('btn-audit-last').disabled = data.page >= auditTotalPages;
+
+        renderPaginationButtons('audit-page-nums', data.page, auditTotalPages, 'goToAuditPage');
+
+        if (data.items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-slate-400">Nenhum registro de auditoria encontrado.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.items.map(l => `
           <tr class="hover:bg-slate-50 transition">
             <td class="py-2.5 px-4 font-mono text-[11px] text-slate-500">${new Date(l.created_at).toLocaleString('pt-BR')}</td>
             <td class="py-2.5 px-3 font-semibold text-slate-800">${l.user_email || 'anônimo'}</td>
             <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${l.action}</span></td>
             <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600">${l.target_id || l.target_type || '--'}</td>
             <td class="py-2.5 px-3 font-mono text-[11px] text-slate-500">${l.ip_address}</td>
-            <td class="py-2.5 px-4 text-[11px] text-slate-500 truncate max-w-[200px]">${l.details ? JSON.stringify(l.details) : '--'}</td>
+            <td class="py-2.5 px-4 text-[11px] text-slate-500 truncate max-w-[200px]" title='${l.details ? JSON.stringify(l.details) : ""}'>${l.details ? JSON.stringify(l.details) : '--'}</td>
           </tr>
         `).join('');
+      } catch(e) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-red-500">Erro ao carregar dados de auditoria.</td></tr>';
+      }
+    }
+
+    // PERFIL DE USUÁRIO & GESTÃO DE ACESSOS
+    let usersCurrentPage = 1;
+    let usersPageSize = 5;
+    let usersTotalPages = 1;
+    let usersDebounceTimer = null;
+
+    async function loadProfileData() {
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (!res.ok) return;
+        const user = await res.json();
+        currentUser = user;
+
+        // Card de identidade
+        const initials = user.full_name ? user.full_name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase() : 'U';
+        document.getElementById('profile-card-avatar').innerText = initials;
+        document.getElementById('profile-card-name').innerText = user.full_name;
+        document.getElementById('profile-card-email').innerText = user.email;
+        document.getElementById('profile-card-role-badge').innerText = (user.role || 'fiscal').toUpperCase() + ' CRQ-V';
+        document.getElementById('profile-card-matricula').innerText = `CRQV-2026-00${user.id}`;
+        document.getElementById('profile-card-created').innerText = new Date(user.created_at).toLocaleDateString('pt-BR');
+        document.getElementById('profile-card-last-login').innerText = user.last_login_at ? new Date(user.last_login_at).toLocaleString('pt-BR') : 'Primeiro Acesso';
+
+        // Formulário de edição
+        document.getElementById('input-profile-fullname').value = user.full_name;
+        document.getElementById('input-profile-email').value = user.email;
       } catch(e) {}
+    }
+
+    async function handleUpdateProfile(e) {
+      e.preventDefault();
+      const full_name = document.getElementById('input-profile-fullname').value;
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({ full_name })
+        });
+        if (res.ok) {
+          alert('Perfil atualizado com sucesso!');
+          const updated = await res.json();
+          updateUserUI(updated);
+          loadProfileData();
+          loadUsersTable(usersCurrentPage);
+        } else {
+          const err = await res.json();
+          alert(err.detail || 'Erro ao atualizar perfil.');
+        }
+      } catch(e) {
+        alert('Erro ao conectar ao servidor.');
+      }
+    }
+
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      const current_password = document.getElementById('input-current-password').value;
+      const new_password = document.getElementById('input-new-password').value;
+      const confirm_password = document.getElementById('input-confirm-password').value;
+
+      if (new_password !== confirm_password) {
+        alert('A confirmação da nova senha não confere.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/change-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({ current_password, new_password })
+        });
+        if (res.ok) {
+          alert('Senha alterada com sucesso!');
+          document.getElementById('input-current-password').value = '';
+          document.getElementById('input-new-password').value = '';
+          document.getElementById('input-confirm-password').value = '';
+        } else {
+          const err = await res.json();
+          alert(err.detail || 'Erro ao alterar senha.');
+        }
+      } catch(e) {
+        alert('Erro ao conectar ao servidor.');
+      }
+    }
+
+    // GESTÃO PAGINADA DA TABELA DE USUÁRIOS
+    function debounceUserSearch() {
+      clearTimeout(usersDebounceTimer);
+      usersDebounceTimer = setTimeout(() => {
+        loadUsersTable(1);
+      }, 350);
+    }
+
+    function resetUserFilters() {
+      document.getElementById('users-filter-q').value = '';
+      document.getElementById('users-filter-role').value = '';
+      loadUsersTable(1);
+    }
+
+    function changeUsersPageSize(size) {
+      usersPageSize = parseInt(size) || 5;
+      loadUsersTable(1);
+    }
+
+    function goToUsersPage(page) {
+      if (page < 1 || page > usersTotalPages) return;
+      loadUsersTable(page);
+    }
+
+    function changeUsersPage(delta) {
+      goToUsersPage(usersCurrentPage + delta);
+    }
+
+    async function loadUsersTable(page = 1) {
+      usersCurrentPage = page;
+      const q = document.getElementById('users-filter-q').value;
+      const role = document.getElementById('users-filter-role').value;
+
+      let url = `${API_BASE}/auth/users?page=${page}&page_size=${usersPageSize}`;
+      if (q) url += `&q=${encodeURIComponent(q)}`;
+      if (role) url += `&role=${role}`;
+
+      const tbody = document.getElementById('users-table-body');
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-400">Carregando quadro de usuários...</td></tr>';
+
+      try {
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        usersTotalPages = data.total_pages || 1;
+
+        // Atualiza contadores
+        document.getElementById('users-total').innerText = data.total;
+        const from = data.total > 0 ? (data.page - 1) * data.page_size + 1 : 0;
+        const to = Math.min(data.total, data.page * data.page_size);
+        document.getElementById('users-range').innerText = `${from} - ${to}`;
+
+        // Atualiza controles
+        document.getElementById('btn-users-first').disabled = data.page <= 1;
+        document.getElementById('btn-users-prev').disabled = data.page <= 1;
+        document.getElementById('btn-users-next').disabled = data.page >= usersTotalPages;
+        document.getElementById('btn-users-last').disabled = data.page >= usersTotalPages;
+
+        renderPaginationButtons('users-page-nums', data.page, usersTotalPages, 'goToUsersPage');
+
+        if (data.items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-slate-400">Nenhum usuário encontrado.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.items.map(u => {
+          let roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Fiscal de Campo</span>';
+          if (u.role === 'gestor') roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Gestor</span>';
+          if (u.role === 'admin') roleBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">Administrador</span>';
+
+          const statusBadge = u.is_active
+            ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Ativo</span>'
+            : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Inativo</span>';
+
+          const lastLogin = u.last_login_at ? new Date(u.last_login_at).toLocaleString('pt-BR') : '<span class="text-slate-400 italic">Nunca</span>';
+
+          return `
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-2.5 px-4">
+                <div class="font-bold text-slate-900">${u.full_name}</div>
+                <div class="text-[11px] font-mono text-slate-500">${u.email}</div>
+              </td>
+              <td class="py-2.5 px-3">${roleBadge}</td>
+              <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+              <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600">${lastLogin}</td>
+              <td class="py-2.5 px-4 text-right space-x-1 whitespace-nowrap">
+                <button onclick='openEditUserModal(${JSON.stringify(u)})' class="bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-700 text-xs px-2.5 py-1 rounded border border-slate-300 hover:border-emerald-600 transition">
+                  Editar
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch(e) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-red-500">Erro ao carregar usuários.</td></tr>';
+      }
+    }
+
+    // MODAL NOVO USUÁRIO
+    function openCreateUserModal() {
+      document.getElementById('create-user-name').value = '';
+      document.getElementById('create-user-email').value = '';
+      document.getElementById('create-user-password').value = '';
+      document.getElementById('create-user-role').value = 'fiscal';
+      document.getElementById('modal-create-user').classList.remove('hidden');
+    }
+    function closeCreateUserModal() {
+      document.getElementById('modal-create-user').classList.add('hidden');
+    }
+
+    async function submitCreateUser(e) {
+      e.preventDefault();
+      const full_name = document.getElementById('create-user-name').value;
+      const email = document.getElementById('create-user-email').value;
+      const password = document.getElementById('create-user-password').value;
+      const role = document.getElementById('create-user-role').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({ full_name, email, password, role, is_active: true })
+        });
+        if (res.ok) {
+          alert('Usuário cadastrado com sucesso!');
+          closeCreateUserModal();
+          loadUsersTable(1);
+        } else {
+          const err = await res.json();
+          alert(err.detail || 'Erro ao criar usuário.');
+        }
+      } catch(e) {
+        alert('Erro de conexão');
+      }
+    }
+
+    // MODAL EDITAR USUÁRIO
+    function openEditUserModal(user) {
+      document.getElementById('edit-user-id').value = user.id;
+      document.getElementById('edit-user-email').value = user.email;
+      document.getElementById('edit-user-name').value = user.full_name;
+      document.getElementById('edit-user-role').value = user.role;
+      document.getElementById('edit-user-status').value = user.is_active ? 'true' : 'false';
+      document.getElementById('edit-user-password').value = '';
+      document.getElementById('modal-edit-user').classList.remove('hidden');
+    }
+    function closeEditUserModal() {
+      document.getElementById('modal-edit-user').classList.add('hidden');
+    }
+
+    async function submitEditUser(e) {
+      e.preventDefault();
+      const userId = document.getElementById('edit-user-id').value;
+      const full_name = document.getElementById('edit-user-name').value;
+      const role = document.getElementById('edit-user-role').value;
+      const is_active = document.getElementById('edit-user-status').value === 'true';
+      const password = document.getElementById('edit-user-password').value;
+
+      const payload = { full_name, role, is_active };
+      if (password && password.trim().length >= 6) {
+        payload.password = password.trim();
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/users/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alert('Usuário atualizado com sucesso!');
+          closeEditUserModal();
+          loadUsersTable(usersCurrentPage);
+        } else {
+          const err = await res.json();
+          alert(err.detail || 'Erro ao atualizar usuário.');
+        }
+      } catch(e) {
+        alert('Erro de conexão');
+      }
     }
   </script>
 </body>

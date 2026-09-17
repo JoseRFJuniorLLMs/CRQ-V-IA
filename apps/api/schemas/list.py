@@ -41,3 +41,10 @@ class SavedListResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class PaginatedSavedListItemsResponse(BaseModel):
+    items: List[SavedListItemResponse]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
