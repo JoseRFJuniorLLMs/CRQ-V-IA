@@ -58,3 +58,13 @@ def list_audit_logs(
         "page_size": page_size,
         "total_pages": total_pages
     }
+
+from apps.api.engine.audit_sink import audit_sink
+
+@router.get("/heraclitus/integrity")
+def check_heraclitus_integrity(
+    current_user: User = Depends(get_current_user)
+):
+    """Consulta o status e a integridade da árvore de Merkle do HeraclitusDB (SPEC-0022)."""
+    return audit_sink.verify_integrity()
+

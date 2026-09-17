@@ -29,4 +29,14 @@ class Settings(BaseModel):
         "*"
     ]
 
+    # HeraclitusDB Event Store (SPEC-0022)
+    AUDIT_POSTGRES: bool = True
+    AUDIT_HERACLITUS: bool = True
+    HERACLITUS_REST_URL: str = os.getenv("HERACLITUS_REST_URL", "http://127.0.0.1:7475")
+    HERACLITUS_USER: str = os.getenv("HERACLITUS_USER", "admin")
+    HERACLITUS_PASSWORD: str = os.getenv("HERACLITUS_PASSWORD", "debian23")
+    HERACLITUS_REQUIRED: bool = False
+    HERACLITUS_TENANT: str = "crq-v"
+
 settings = Settings()
+

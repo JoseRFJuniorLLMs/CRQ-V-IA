@@ -38,6 +38,8 @@ def get_current_user(
 
     return user
 
+from apps.api.engine.audit_sink import audit_sink, AuditEvent
+
 def record_audit(
     db: Session,
     action: str,
@@ -47,15 +49,17 @@ def record_audit(
     details: dict = None,
     ip_address: str = "127.0.0.1"
 ):
-    """Registra evento de auditoria conforme exigência de governança e LGPD."""
-    log_entry = AuditLog(
-        user_id=user.id if user else None,
-        user_email=user.email if user else "anonymous",
-        action=action,
-        target_type=target_type,
-        target_id=target_id,
-        details=details,
-        ip_address=ip_address
+    """Registra evento de auditoria conforme governança, LGPD e SPEC-0022 (HeraclitusDB)."""
+    event = AuditEvent(
+        event_type=action,
+        actor_id=str(user.id) if user else "anonymous",
+        actor_role=user.role if user else "anonymous",
+        entity_type=target_type or "system",
+        entity_id=target_id or action,
+        payload=details or {},
+        ip_address=ip_address,
+        tenant_id=settings.HERACLITUS_TENANT,
+        software_release="1.0.0"
     )
-    db.add(log_entry)
-    db.commit()
+    audit_sink.append(event, db=db)
+

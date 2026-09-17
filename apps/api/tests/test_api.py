@@ -427,4 +427,18 @@ def test_exports_with_specific_filters():
     assert xlsx_resp.status_code == 200
     assert len(xlsx_resp.content) > 1000
 
+def test_heraclitus_audit_sink_and_integrity():
+    """Valida a integração da SPEC-0022 com o HeraclitusDB Event Store e verificação Merkle."""
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    integ_resp = client.get("/api/audit/heraclitus/integrity", headers=headers)
+    assert integ_resp.status_code == 200
+    data = integ_resp.json()
+    assert data["engine"] == "HeraclitusDB"
+    assert data["shadow_mode"] is True
+    assert "merkle_status" in data
+
+
 
