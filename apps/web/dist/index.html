@@ -537,46 +537,55 @@
     </div>
   </div>
 
-  <!-- MODAL: LOGIN / TROCA DE FISCAIS -->
-  <div id="modal-login" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-5">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div class="flex items-center space-x-2">
-          <i data-lucide="lock" class="w-5 h-5 text-emerald-600"></i>
-          <h3 class="font-bold text-slate-900 text-base">Autenticação de Usuário CRQ-V</h3>
+  <!-- TELA DE LOGIN DE PÁGINA INTEIRA (EXIBIDA SE NÃO ESTIVER AUTENTICADO) -->
+  <div id="full-login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 space-y-6">
+      <div class="text-center space-y-2">
+        <div class="inline-flex bg-gradient-to-tr from-emerald-500 to-teal-400 p-3 rounded-xl shadow-lg">
+          <i data-lucide="flask-conical" class="w-8 h-8 text-slate-950"></i>
         </div>
-        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 p-1">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+        <h1 class="text-2xl font-extrabold tracking-tight text-white">CRQ-V-IA</h1>
+        <p class="text-xs text-emerald-400 font-mono font-semibold uppercase tracking-wider">Conselho Regional de Química da 5ª Região (RS)</p>
+        <p class="text-xs text-slate-400">Plataforma de Prospecção e Fiscalização de Empresas • Pregão 0005/2026</p>
       </div>
 
-      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 text-xs text-slate-300 flex items-center space-x-2">
+        <i data-lucide="users" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+        <span>Atende à exigência contratual de <strong>no mínimo 02 acessos simultâneos</strong> (TR 1.2.3.4).</span>
+      </div>
+
+      <form id="screen-login-form" onsubmit="handleScreenLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">E-mail Institucional</label>
-          <input type="email" id="login-email" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-300 mb-1">E-mail Institucional</label>
+          <input type="email" id="screen-login-email" required placeholder="fiscal1@crqv.org.br" class="w-full px-3.5 py-2.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Senha de Acesso</label>
-          <input type="password" id="login-password" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Senha de Acesso</label>
+          <input type="password" id="screen-login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
         </div>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 rounded-lg transition shadow">
-          Acessar Plataforma
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-lg transition shadow-lg flex items-center justify-center space-x-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Entrar no Sistema</span>
         </button>
       </form>
 
-      <!-- ATALHOS RÁPIDOS PARA DEMONSTRAÇÃO DO PREGÃO -->
-      <div class="border-t border-slate-100 pt-3">
-        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Acesso Rápido de Demonstração (TR 02 Acessos):</span>
+      <!-- ATALHOS RÁPIDOS DE DEMONSTRAÇÃO DO PREGÃO -->
+      <div class="border-t border-slate-800 pt-4 space-y-2">
+        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Acessos Rápidos do Edital (2 Fiscais):</span>
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="fillDemoLogin('fiscal1@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2 border border-slate-200 hover:border-emerald-500 rounded-lg bg-slate-50 text-[11px] text-slate-700 transition">
-            <strong class="block text-emerald-700">Fiscal Posto 01</strong>
-            <span>fiscal1@crqv.org.br</span>
+          <button type="button" onclick="quickLogin('fiscal1@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2.5 border border-slate-700 hover:border-emerald-500 rounded-lg bg-slate-950/60 text-[11px] transition group">
+            <strong class="block text-emerald-400 group-hover:text-emerald-300">Fiscal Posto 01</strong>
+            <span class="text-slate-400">fiscal1@crqv.org.br</span>
           </button>
-          <button onclick="fillDemoLogin('fiscal2@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2 border border-slate-200 hover:border-emerald-500 rounded-lg bg-slate-50 text-[11px] text-slate-700 transition">
-            <strong class="block text-emerald-700">Fiscal Posto 02</strong>
-            <span>fiscal2@crqv.org.br</span>
+          <button type="button" onclick="quickLogin('fiscal2@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2.5 border border-slate-700 hover:border-emerald-500 rounded-lg bg-slate-950/60 text-[11px] transition group">
+            <strong class="block text-emerald-400 group-hover:text-emerald-300">Fiscal Posto 02</strong>
+            <span class="text-slate-400">fiscal2@crqv.org.br</span>
           </button>
         </div>
+        <button type="button" onclick="quickLogin('gestor@crqv.org.br', 'crqv@gestor2026')" class="w-full text-left p-2 border border-slate-800 hover:border-slate-700 rounded-lg bg-slate-950/40 text-[11px] text-slate-400 flex items-center justify-between">
+          <span>Gestor do Departamento</span>
+          <span class="text-slate-500">gestor@crqv.org.br</span>
+        </button>
       </div>
     </div>
   </div>
@@ -645,28 +654,55 @@
       if (currentToken) {
         await checkAuth();
       } else {
-        // Modo visitante pré-autenticado para demonstração imediata
-        await autoLoginDemo();
+        showLoginScreen();
       }
-      loadProspects(1);
     });
 
-    async function autoLoginDemo() {
+    function showLoginScreen() {
+      const scr = document.getElementById('full-login-screen');
+      if (scr) {
+        scr.classList.remove('hidden');
+        scr.classList.add('flex');
+      }
+      lucide.createIcons();
+    }
+
+    function hideLoginScreen() {
+      const scr = document.getElementById('full-login-screen');
+      if (scr) {
+        scr.classList.add('hidden');
+        scr.classList.remove('flex');
+      }
+    }
+
+    async function quickLogin(email, password) {
       try {
         const res = await fetch(`${API_BASE}/auth/login`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ email: 'fiscal1@crqv.org.br', password: 'crqv@fiscal2026' })
+          body: JSON.stringify({ email, password })
         });
-        if (res.ok) {
-          const data = await res.json();
-          currentToken = data.access_token;
-          localStorage.setItem('crqv_token', currentToken);
-          updateUserUI(data);
+        if (!res.ok) {
+          alert('Credenciais inválidas!');
+          return;
         }
-      } catch (e) {
-        console.error("Auto login error:", e);
+        const data = await res.json();
+        currentToken = data.access_token;
+        localStorage.setItem('crqv_token', currentToken);
+        updateUserUI(data);
+        updateSessionStats();
+        hideLoginScreen();
+        loadProspects(1);
+      } catch (err) {
+        alert('Erro ao conectar ao servidor.');
       }
+    }
+
+    async function handleScreenLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('screen-login-email').value;
+      const password = document.getElementById('screen-login-password').value;
+      await quickLogin(email, password);
     }
 
     async function checkAuth() {
@@ -678,11 +714,13 @@
           currentUser = await res.json();
           updateUserUI(currentUser);
           updateSessionStats();
+          hideLoginScreen();
+          loadProspects(1);
         } else {
           logout();
         }
       } catch (e) {
-        console.error(e);
+        logout();
       }
     }
 
@@ -717,16 +755,11 @@
       document.getElementById('user-info-box').classList.add('hidden');
       document.getElementById('login-top-btn').classList.remove('hidden');
       document.getElementById('concurrency-pill').classList.add('hidden');
-      openLoginModal();
+      showLoginScreen();
     }
 
     function openLoginModal() {
-      document.getElementById('modal-login').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeLoginModal() {
-      document.getElementById('modal-login').classList.add('hidden');
+      showLoginScreen();
     }
 
     function fillDemoLogin(email, pwd) {
