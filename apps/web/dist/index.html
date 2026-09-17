@@ -4,15 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CRQ-V-IA | Plataforma de Prospecção Fiscal Inteligente (RS)</title>
+  <link rel="icon" type="image/png" href="/img/crqv.png">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tema e Identidade Visual Oficial do CRQ-V -->
+  <link rel="stylesheet" href="/css/crqv-theme.css">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js para Dashboard -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    body { font-family: 'Inter', sans-serif; }
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+    body { font-family: 'Roboto', sans-serif; }
     .badge-high { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
     .badge-medium { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
     .badge-low { background-color: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
@@ -21,74 +24,103 @@
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-  <!-- TOP BAR GOVERNAMENTAL -->
-  <header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="bg-gradient-to-tr from-emerald-500 to-teal-400 p-2 rounded-lg shadow">
-          <i data-lucide="flask-conical" class="w-6 h-6 text-slate-950 font-bold"></i>
-        </div>
-        <div>
-          <div class="flex items-center space-x-2">
-            <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-200">CRQ-V-IA</span>
-            <span class="text-xs bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded font-mono font-medium">Pregão 0005/2026</span>
+  <!-- BARRA DE ACESSIBILIDADE E PADRÃO GOV / CRQ-V -->
+  <div class="crqv-top-bar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <span class="inline-flex items-center space-x-1.5">
+          <i data-lucide="accessibility" class="w-3.5 h-3.5 text-[#72B42D]"></i>
+          <span>Portal de Fiscalização CRQ-V (5ª Região - RS)</span>
+        </span>
+        <span class="hidden sm:inline text-slate-500">•</span>
+        <a href="https://www.crqv.org.br/pagina/view/58" target="_blank" class="hidden sm:inline">Acessibilidade</a>
+        <span class="hidden sm:inline text-slate-500">•</span>
+        <a href="https://www.crqv.org.br/pagina/view/57" target="_blank" class="hidden sm:inline">LGPD (Lei 13.709/2018)</a>
+        <span class="hidden md:inline text-slate-500">•</span>
+        <span class="hidden md:inline text-sky-200">Processo nº 1729/2026 • Pregão Eletrônico 0005/2026</span>
+      </div>
+      <div class="flex items-center space-x-3 text-[11px]">
+        <span class="hidden lg:inline text-slate-400">Suporte Técnico: (51) 3000-0000</span>
+        <span class="bg-[#1183C6]/30 text-sky-200 px-2 py-0.5 rounded font-mono font-medium">v1.2.0-OFICIAL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CABEÇALHO PRINCIPAL (.bg-topo OFICIAL) -->
+  <div class="crqv-header-main">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+      <div class="flex items-center space-x-4">
+        <a href="#" onclick="switchTab('prospects')" class="flex items-center space-x-3 group">
+          <img src="/img/crqv.png" alt="CRQ-V - Conselho Regional de Química da 5ª Região" class="crqv-logo">
+          <div class="border-l border-slate-200 pl-3.5">
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-xl tracking-tight text-[#1B3D79]">CRQ-V-IA</span>
+              <span class="text-[11px] bg-[#EBF4FA] text-[#1183C6] font-semibold border border-[#BCD5EB] px-2 py-0.5 rounded">Prospecção Inteligente</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Conselho Regional de Química da 5ª Região • Rio Grande do Sul</p>
           </div>
-          <p class="text-xs text-slate-400">Conselho Regional de Química da 5ª Região • Rio Grande do Sul</p>
-        </div>
+        </a>
       </div>
 
-      <!-- NAV TABS -->
-      <nav id="nav-tabs" class="hidden md:flex items-center space-x-1">
-        <button onclick="switchTab('prospects')" id="tab-btn-prospects" class="px-3 py-2 text-sm font-medium rounded-md bg-slate-800 text-white flex items-center space-x-1.5 transition">
-          <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
-          <span>Prospecção</span>
-        </button>
-        <button onclick="switchTab('lists')" id="tab-btn-lists" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
-          <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-400"></i>
-          <span>Roteiros Fiscais</span>
-        </button>
-        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
-          <i data-lucide="bar-chart-3" class="w-4 h-4 text-emerald-400"></i>
-          <span>Painel</span>
-        </button>
-        <button onclick="switchTab('audit')" id="tab-btn-audit" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
-          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-          <span>Auditoria LGPD</span>
-        </button>
-        <button onclick="switchTab('profile')" id="tab-btn-profile" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
-          <i data-lucide="user-cog" class="w-4 h-4 text-emerald-400"></i>
-          <span>Perfil & Usuários</span>
-        </button>
-        <button onclick="switchTab('help')" id="tab-btn-help" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
-          <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i>
-          <span>Manual & Suporte</span>
-        </button>
-      </nav>
-
-      <!-- USER & CONCURRENCY BADGE -->
-      <div id="user-controls" class="flex items-center space-x-3">
-        <!-- Concurrency status pill (Garantia TR-007) -->
-        <div id="concurrency-pill" class="hidden sm:flex items-center space-x-1.5 bg-slate-800/80 border border-slate-700 px-2.5 py-1 rounded-full text-xs text-slate-300" title="Controle de Acessos Simultâneos (TR item 1.2.3.4)">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Sessões Ativas: <strong id="sessions-count" class="text-emerald-400">2</strong></span>
+      <!-- BOTÕES INSTITUCIONAIS DO PORTAL -->
+      <div class="flex items-center space-x-3">
+        <div id="concurrency-pill" class="hidden sm:flex items-center space-x-1.5 bg-slate-50 border border-slate-200 px-3 py-1 rounded-full text-xs text-slate-700" title="Controle de Acessos Simultâneos (TR item 1.2.3.4)">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#72B42D] animate-pulse"></span>
+          <span>Sessões Ativas: <strong id="sessions-count" class="text-[#1B3D79]">2</strong></span>
         </div>
 
-        <div id="user-info-box" class="hidden items-center space-x-2 border-l border-slate-700 pl-3">
-          <div onclick="switchTab('profile')" class="flex items-center space-x-2 cursor-pointer group" title="Clique para ver Meu Perfil e Gestão de Usuários">
-            <div id="user-avatar" class="w-7 h-7 rounded-full bg-emerald-700 text-white font-bold text-xs flex items-center justify-center group-hover:bg-emerald-600 transition shadow">F</div>
-            <div class="text-right">
-              <div id="user-name" class="text-xs font-semibold text-slate-200 truncate max-w-[140px] group-hover:text-emerald-300 transition">Fiscal de Campo</div>
-              <div id="user-role" class="text-[10px] text-emerald-400 font-mono uppercase">Fiscal CRQ-V</div>
+        <div id="user-info-box" class="hidden items-center space-x-2 border-l border-slate-200 pl-3">
+          <div onclick="switchTab('profile')" class="flex items-center space-x-2 cursor-pointer group" title="Meu Perfil e Gestão de Usuários">
+            <div id="user-avatar" class="w-8 h-8 rounded-full bg-[#72B42D] text-white font-bold text-xs flex items-center justify-center shadow">F</div>
+            <div class="text-left hidden md:block">
+              <div id="user-name" class="text-xs font-bold text-[#1B3D79] truncate max-w-[130px]">Fiscal de Campo</div>
+              <div id="user-role" class="text-[10px] text-[#72B42D] font-mono font-bold uppercase">Fiscal CRQ-V</div>
             </div>
           </div>
-          <button onclick="logout()" title="Encerrar Sessão" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition ml-1">
+          <button onclick="logout()" title="Encerrar Sessão" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-slate-100 rounded-lg transition">
             <i data-lucide="log-out" class="w-4 h-4"></i>
           </button>
         </div>
 
-        <button id="login-top-btn" onclick="openLoginModal()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-3 py-1.5 rounded-md transition shadow">
-          Entrar no Sistema
+        <button id="login-top-btn" onclick="openLoginModal()" class="text-xs btn-crqv-green font-bold px-4 py-2 rounded-lg shadow transition flex items-center space-x-1.5">
+          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+          <span>Entrar no Sistema</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE NAVEGAÇÃO INSTITUCIONAL (.crqv-navbar) -->
+  <header class="crqv-navbar sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <nav id="nav-tabs" class="flex items-center space-x-1 py-1 overflow-x-auto">
+        <button onclick="switchTab('prospects')" id="tab-btn-prospects" class="crqv-nav-tab tab-active">
+          <i data-lucide="search" class="w-4 h-4 text-[#72B42D]"></i>
+          <span>Prospecção Fiscal</span>
+        </button>
+        <button onclick="switchTab('lists')" id="tab-btn-lists" class="crqv-nav-tab tab-inactive">
+          <i data-lucide="clipboard-list" class="w-4 h-4 text-[#72B42D]"></i>
+          <span>Roteiros de Diligência</span>
+        </button>
+        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="crqv-nav-tab tab-inactive">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 text-[#72B42D]"></i>
+          <span>Painel Estratégico</span>
+        </button>
+        <button onclick="switchTab('audit')" id="tab-btn-audit" class="crqv-nav-tab tab-inactive">
+          <i data-lucide="shield-check" class="w-4 h-4 text-[#72B42D]"></i>
+          <span>Auditoria LGPD</span>
+        </button>
+        <button onclick="switchTab('profile')" id="tab-btn-profile" class="crqv-nav-tab tab-inactive">
+          <i data-lucide="user-cog" class="w-4 h-4 text-[#72B42D]"></i>
+          <span>Perfil & Usuários</span>
+        </button>
+        <button onclick="switchTab('help')" id="tab-btn-help" class="crqv-nav-tab tab-inactive">
+          <i data-lucide="book-open" class="w-4 h-4 text-[#72B42D]"></i>
+          <span>Manual & Suporte</span>
+        </button>
+      </nav>
+      <div class="hidden lg:flex items-center space-x-2 text-xs text-sky-200">
+        <span>Resolução CFQ nº 339/2025</span>
       </div>
     </div>
   </header>
@@ -138,15 +170,46 @@
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Razão Social, Nome Fantasia ou CNPJ</label>
             <div class="relative">
-              <input type="text" id="filter-q" oninput="debounceSearch()" placeholder="Ex: Petroquímica, Tintas..." class="w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <input type="text" id="filter-q" oninput="debounceSearch()" placeholder="Ex: Petroquímica, Tintas, 92.754..." class="w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
             </div>
+          </div>
+
+          <!-- Filtro de CNAE Primário ou Secundário (SPEC-0021) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Código CNAE (Primário ou Secundário)</label>
+            <div class="relative">
+              <input type="text" id="filter-cnae" oninput="debounceSearch()" placeholder="Ex: 2011, 2071, 2031, 1062..." class="w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
+              <i data-lucide="hash" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
+            </div>
+            <span class="text-[10px] text-slate-500 mt-0.5 block">Busca em todas as atividades cadastradas</span>
+          </div>
+
+          <!-- Divisão Industrial CNAE (Hierarquia 2 Dígitos) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Divisão Econômica (CNAE)</label>
+            <select id="filter-division" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
+              <option value="">Todas as Divisões Industriais</option>
+              <option value="20">Divisão 20 - Fabricação de Produtos Químicos</option>
+              <option value="21">Divisão 21 - Produtos Farmoquímicos e Farmacêuticos</option>
+              <option value="19">Divisão 19 - Fabricação de Coque e Refino de Petróleo</option>
+              <option value="10">Divisão 10 - Fabricação de Produtos Alimentícios</option>
+              <option value="11">Divisão 11 - Fabricação de Bebidas (Vinhos, Cervejas, Destilados)</option>
+              <option value="15">Divisão 15 - Curtimento de Couros e Calçados</option>
+              <option value="17">Divisão 17 - Fabricação de Celulose, Papel e Derivados</option>
+              <option value="22">Divisão 22 - Fabricação de Borracha e Material Plástico</option>
+              <option value="23">Divisão 23 - Minerais Não Metálicos, Cimento e Vidro</option>
+              <option value="24">Divisão 24 - Metalurgia e Tratamento de Metais</option>
+              <option value="36">Divisão 36/37/38 - Água, Efluentes e Tratamento de Resíduos</option>
+              <option value="71">Divisão 71/72 - Laboratórios de Análises e P&D</option>
+              <option value="46">Divisão 46 - Comércio Atacadista de Químicos e Perigosos</option>
+            </select>
           </div>
 
           <!-- Município RS -->
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Município (Rio Grande do Sul)</label>
-            <select id="filter-city" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <select id="filter-city" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
               <option value="">Todos os Municípios do RS</option>
               <option value="Porto Alegre">Porto Alegre</option>
               <option value="Canoas">Canoas</option>
@@ -164,10 +227,26 @@
             </select>
           </div>
 
+          <!-- Bairro / Bairro Distrital (SPEC-0021) -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Bairro / Distrito</label>
+            <input type="text" id="filter-district" oninput="debounceSearch()" placeholder="Ex: Navegantes, Polo, São Ciro..." class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
+          </div>
+
+          <!-- Matriz / Filial -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Estabelecimento</label>
+            <select id="filter-branch" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
+              <option value="">Matrizes e Filiais</option>
+              <option value="MATRIZ">Somente Matriz</option>
+              <option value="FILIAL">Somente Filial</option>
+            </select>
+          </div>
+
           <!-- Prioridade Regulatório CFQ -->
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Prioridade CFQ 339/2025</label>
-            <select id="filter-tier" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <select id="filter-tier" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
               <option value="">Todas as Prioridades</option>
               <option value="HIGH">Alta / Registro Obrigatório (80 - 100)</option>
               <option value="MEDIUM">Média / Atividade Técnica (55 - 79)</option>
@@ -178,7 +257,7 @@
           <!-- Porte Empresarial -->
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Porte Empresarial (RFB)</label>
-            <select id="filter-size" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <select id="filter-size" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
               <option value="">Todos os Portes</option>
               <option value="ME">Microempresa (ME)</option>
               <option value="EPP">Empresa de Pequeno Porte (EPP)</option>
@@ -189,7 +268,7 @@
           <!-- Situação Cadastral RFB -->
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Situação Cadastral (RFB)</label>
-            <select id="filter-status" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <select id="filter-status" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
               <option value="ATIVA">Somente Ativas</option>
               <option value="BAIXADA">Baixadas / Extintas</option>
               <option value="">Todas as Situações</option>
@@ -199,7 +278,7 @@
           <!-- Status no CRQ-V -->
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Situação no CRQ-V</label>
-            <select id="filter-crq" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <select id="filter-crq" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
               <option value="">Todas as Situações no CRQ-V</option>
               <option value="NAO_CADASTRADA">Não Cadastrada (Alvo Fiscal)</option>
               <option value="EM_FISCALIZACAO">Em Fiscalização / Processo Aberto</option>
@@ -756,6 +835,21 @@
       </div>
     </section>
 
+    <!-- INSTITUTIONAL FOOTER -->
+    <footer class="mt-12 pt-6 pb-8 border-t border-slate-200 text-xs text-slate-500 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <img src="/img/crqv.png" alt="CRQ-V" class="h-9 w-auto object-contain">
+        <div>
+          <strong class="text-slate-800 block">Conselho Regional de Química da 5ª Região (CRQ-V)</strong>
+          <span>Autarquia Federal Fiscalizadora da Profissão da Química • Lei nº 2.800 de 18/06/1956</span>
+        </div>
+      </div>
+      <div class="text-center md:text-right space-y-1">
+        <p class="font-medium text-slate-700">CRQ-V-IA • Sistema de Inteligência Regulatória e Prospecção Fiscal</p>
+        <p class="text-slate-400 text-[11px]">Pregão Eletrônico 0005/2026 • Conformidade com CFQ nº 339/2025 e LGPD (Lei 13.709/2018)</p>
+      </div>
+    </footer>
+
   </main>
 
   <!-- MODAL: FICHA COMPLETA DA EMPRESA -->
@@ -814,6 +908,45 @@
         </div>
       </div>
 
+      <!-- RESPONSABILIDADE TÉCNICA & REGISTRO PROFISSIONAL (SPEC-0021 / LEI 2.800/1956) -->
+      <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-white text-xs">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+          <h4 class="font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+            <i data-lucide="award" class="w-4 h-4 text-[#1183C6]"></i>
+            <span>Responsabilidade Técnica & AFT (CRQ-V)</span>
+          </h4>
+          <span id="modal-reg-status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-[#1B3D79]">
+            Registro Obrigatório
+          </span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+            <span class="text-[10px] text-slate-500 block uppercase font-semibold">Responsável Técnico (RT)</span>
+            <span id="modal-tech-manager" class="font-bold text-slate-800 text-xs mt-0.5 block">Não informado</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+            <span class="text-[10px] text-slate-500 block uppercase font-semibold">Registro CRQ do RT</span>
+            <span id="modal-tech-crq" class="font-bold text-slate-800 text-xs mt-0.5 block">--</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+            <span class="text-[10px] text-slate-500 block uppercase font-semibold">Inscrição Estadual (IE)</span>
+            <span id="modal-ie" class="font-bold text-slate-800 text-xs mt-0.5 block">--</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+            <span class="text-[10px] text-slate-500 block uppercase font-semibold">Número da AFT</span>
+            <span id="modal-aft-num" class="font-bold text-slate-800 text-xs mt-0.5 block">Não emitida</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+            <span class="text-[10px] text-slate-500 block uppercase font-semibold">Validade da AFT</span>
+            <span id="modal-aft-valid" class="font-bold text-slate-800 text-xs mt-0.5 block">--</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+            <span class="text-[10px] text-slate-500 block uppercase font-semibold">Enquadramento Legal</span>
+            <span id="modal-reg-status-desc" class="font-bold text-slate-800 text-xs mt-0.5 block">Res. CFQ 339/2025</span>
+          </div>
+        </div>
+      </div>
+
       <!-- SITUAÇÃO NO CRQ-V & LIVE CHECK -->
       <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -860,52 +993,54 @@
   </div>
 
   <!-- TELA DE LOGIN DE PÁGINA INTEIRA (EXIBIDA SE NÃO ESTIVER AUTENTICADO) -->
-  <div id="full-login-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 space-y-6">
-      <div class="text-center space-y-2">
-        <div class="inline-flex bg-gradient-to-tr from-emerald-500 to-teal-400 p-3 rounded-xl shadow-lg">
-          <i data-lucide="flask-conical" class="w-8 h-8 text-slate-950"></i>
+  <div id="full-login-screen" class="fixed inset-0 bg-[#0B244F]/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white border border-slate-200 rounded-2xl shadow-2xl p-8 space-y-6 text-slate-800">
+      <div class="text-center space-y-3">
+        <div class="flex justify-center">
+          <img src="/img/crqv.png" alt="Conselho Regional de Química da 5ª Região" class="crqv-logo-login">
         </div>
-        <h1 class="text-2xl font-extrabold tracking-tight text-white">CRQ-V-IA</h1>
-        <p class="text-xs text-emerald-400 font-mono font-semibold uppercase tracking-wider">Conselho Regional de Química da 5ª Região (RS)</p>
-        <p class="text-xs text-slate-400">Plataforma de Prospecção e Fiscalização de Empresas • Pregão 0005/2026</p>
+        <div>
+          <h1 class="text-2xl font-extrabold tracking-tight text-[#1B3D79]">CRQ-V-IA</h1>
+          <p class="text-xs font-bold text-[#72B42D] uppercase tracking-wider">Conselho Regional de Química da 5ª Região (RS)</p>
+          <p class="text-xs text-slate-500 mt-1">Plataforma de Prospecção e Fiscalização de Empresas • Pregão 0005/2026</p>
+        </div>
       </div>
 
-      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-3 text-xs text-slate-300 flex items-center space-x-2">
-        <i data-lucide="users" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+      <div class="bg-[#EBF4FA] border border-[#1183C6]/30 rounded-xl p-3 text-xs text-[#1B3D79] flex items-center space-x-2.5">
+        <i data-lucide="users" class="w-4 h-4 text-[#1183C6] flex-shrink-0"></i>
         <span>Atende à exigência contratual de <strong>no mínimo 02 acessos simultâneos</strong> (TR 1.2.3.4).</span>
       </div>
 
       <form id="screen-login-form" onsubmit="handleScreenLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">E-mail Institucional</label>
-          <input type="email" id="screen-login-email" required placeholder="fiscal1@crqv.org.br" class="w-full px-3.5 py-2.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">E-mail Institucional</label>
+          <input type="email" id="screen-login-email" required placeholder="fiscal1@crqv.org.br" class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Senha de Acesso</label>
-          <input type="password" id="screen-login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 text-xs bg-slate-950 border border-slate-700 text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Senha de Acesso</label>
+          <input type="password" id="screen-login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-[#1183C6] focus:outline-none">
         </div>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-lg transition shadow-lg flex items-center justify-center space-x-2">
+        <button type="submit" class="w-full btn-crqv-green font-bold text-xs py-3 rounded-lg transition shadow-md flex items-center justify-center space-x-2">
           <i data-lucide="log-in" class="w-4 h-4"></i>
           <span>Entrar no Sistema</span>
         </button>
       </form>
 
       <!-- ATALHOS RÁPIDOS DE DEMONSTRAÇÃO DO PREGÃO -->
-      <div class="border-t border-slate-800 pt-4 space-y-2">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Acessos Rápidos do Edital (2 Fiscais):</span>
+      <div class="border-t border-slate-200 pt-4 space-y-2">
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Acessos Rápidos do Edital (2 Fiscais):</span>
         <div class="grid grid-cols-2 gap-2">
-          <button type="button" onclick="quickLogin('fiscal1@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2.5 border border-slate-700 hover:border-emerald-500 rounded-lg bg-slate-950/60 text-[11px] transition group">
-            <strong class="block text-emerald-400 group-hover:text-emerald-300">Fiscal Posto 01</strong>
-            <span class="text-slate-400">fiscal1@crqv.org.br</span>
+          <button type="button" onclick="quickLogin('fiscal1@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2.5 border border-slate-200 hover:border-[#1183C6] hover:bg-sky-50/50 rounded-lg bg-slate-50 text-[11px] transition group">
+            <strong class="block text-[#1183C6] group-hover:text-[#1B3D79]">Fiscal Posto 01</strong>
+            <span class="text-slate-500">fiscal1@crqv.org.br</span>
           </button>
-          <button type="button" onclick="quickLogin('fiscal2@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2.5 border border-slate-700 hover:border-emerald-500 rounded-lg bg-slate-950/60 text-[11px] transition group">
-            <strong class="block text-emerald-400 group-hover:text-emerald-300">Fiscal Posto 02</strong>
-            <span class="text-slate-400">fiscal2@crqv.org.br</span>
+          <button type="button" onclick="quickLogin('fiscal2@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2.5 border border-slate-200 hover:border-[#1183C6] hover:bg-sky-50/50 rounded-lg bg-slate-50 text-[11px] transition group">
+            <strong class="block text-[#1183C6] group-hover:text-[#1B3D79]">Fiscal Posto 02</strong>
+            <span class="text-slate-500">fiscal2@crqv.org.br</span>
           </button>
         </div>
-        <button type="button" onclick="quickLogin('gestor@crqv.org.br', 'crqv@gestor2026')" class="w-full text-left p-2 border border-slate-800 hover:border-slate-700 rounded-lg bg-slate-950/40 text-[11px] text-slate-400 flex items-center justify-between">
-          <span>Gestor do Departamento</span>
+        <button type="button" onclick="quickLogin('gestor@crqv.org.br', 'crqv@gestor2026')" class="w-full text-left p-2.5 border border-slate-200 hover:border-[#1B3D79] hover:bg-slate-100 rounded-lg bg-slate-50 text-[11px] text-slate-700 flex items-center justify-between">
+          <span class="font-semibold">Gestor do Departamento</span>
           <span class="text-slate-500">gestor@crqv.org.br</span>
         </button>
       </div>
@@ -1212,12 +1347,12 @@
         if (view && btn) {
           if (t === tabId) {
             view.classList.remove('hidden');
-            btn.classList.add('bg-slate-800', 'text-white');
-            btn.classList.remove('text-slate-300');
+            btn.classList.add('tab-active');
+            btn.classList.remove('tab-inactive');
           } else {
             view.classList.add('hidden');
-            btn.classList.remove('bg-slate-800', 'text-white');
-            btn.classList.add('text-slate-300');
+            btn.classList.remove('tab-active');
+            btn.classList.add('tab-inactive');
           }
         }
       });
@@ -1296,10 +1431,30 @@
       }
     }
 
+    function resetFilters() {
+      document.getElementById('filter-q').value = '';
+      if (document.getElementById('filter-cnae')) document.getElementById('filter-cnae').value = '';
+      if (document.getElementById('filter-division')) document.getElementById('filter-division').value = '';
+      document.getElementById('filter-city').value = '';
+      if (document.getElementById('filter-district')) document.getElementById('filter-district').value = '';
+      if (document.getElementById('filter-branch')) document.getElementById('filter-branch').value = '';
+      document.getElementById('filter-tier').value = '';
+      document.getElementById('filter-size').value = '';
+      document.getElementById('filter-status').value = 'ATIVA';
+      document.getElementById('filter-crq').value = '';
+      document.getElementById('filter-score').value = 0;
+      document.getElementById('score-val').innerText = '0';
+      loadProspects(1);
+    }
+
     async function loadProspects(page = 1) {
       prospectsCurrentPage = page;
       const q = document.getElementById('filter-q').value;
+      const cnae = document.getElementById('filter-cnae') ? document.getElementById('filter-cnae').value : '';
+      const division = document.getElementById('filter-division') ? document.getElementById('filter-division').value : '';
       const city = document.getElementById('filter-city').value;
+      const district = document.getElementById('filter-district') ? document.getElementById('filter-district').value : '';
+      const branch = document.getElementById('filter-branch') ? document.getElementById('filter-branch').value : '';
       const tier = document.getElementById('filter-tier').value;
       const size = document.getElementById('filter-size').value;
       const status = document.getElementById('filter-status').value;
@@ -1308,7 +1463,11 @@
 
       let url = `${API_BASE}/prospects?page=${page}&page_size=${prospectsPageSize}`;
       if (q) url += `&q=${encodeURIComponent(q)}`;
+      if (cnae) url += `&cnae=${encodeURIComponent(cnae)}`;
+      if (division) url += `&division=${encodeURIComponent(division)}`;
       if (city) url += `&city=${encodeURIComponent(city)}`;
+      if (district) url += `&district=${encodeURIComponent(district)}`;
+      if (branch) url += `&branch_type=${encodeURIComponent(branch)}`;
       if (tier) url += `&tier=${tier}`;
       if (size) url += `&size=${size}`;
       if (status) url += `&status=${status}`;
@@ -1453,6 +1612,25 @@
           secList.innerHTML = '<li>Nenhum CNAE secundário registrado</li>';
         }
 
+        // Responsabilidade Técnica & AFT (SPEC-0021)
+        if (document.getElementById('modal-tech-manager')) {
+          document.getElementById('modal-tech-manager').innerText = est.technical_manager || 'Não informado / Ausente';
+          document.getElementById('modal-tech-crq').innerText = est.technical_manager_crq || 'Não registrado';
+          document.getElementById('modal-ie').innerText = est.state_registration || 'Isento / Não informado';
+          document.getElementById('modal-aft-num').innerText = est.aft_number || 'Sem AFT Ativa';
+          document.getElementById('modal-aft-valid').innerText = est.aft_valid_until || '--';
+
+          const regStatusLabels = {
+            'MANDATORY_REGISTRATION': 'Registro Obrigatório (CFQ 339)',
+            'CHEMICAL_SUPPORT_ACTIVITY': 'Atividade Química de Apoio',
+            'SERVICE_TO_THIRD_PARTIES': 'Prestação de Serviços Químicos',
+            'NOT_APPLICABLE': 'Não Sujeita a Registro'
+          };
+          const regStatusDesc = regStatusLabels[est.regulatory_status] || est.regulatory_status || 'Registro Obrigatório';
+          document.getElementById('modal-reg-status-badge').innerText = regStatusDesc;
+          document.getElementById('modal-reg-status-desc').innerText = est.regulatory_status || 'Res. CFQ 339/2025';
+        }
+
         document.getElementById('modal-crq-status-select').value = est.crq_status;
         document.getElementById('live-check-result').innerHTML = 'Situação na base interna: <strong>' + est.registration_status + '</strong>. Clique ao lado para consulta em tempo real.';
 
@@ -1471,20 +1649,36 @@
       if (!selectedEstablishment) return;
       const btn = document.getElementById('btn-live-check');
       btn.disabled = true;
-      btn.innerHTML = '<span class="animate-spin">⌛</span> Consultando RFB...';
+      btn.innerHTML = '<span class="animate-spin inline-block">⌛</span> Consultando RFB...';
 
       try {
         const res = await fetch(`${API_BASE}/prospects/${selectedEstablishment.cnpj}/live-check`, {
           headers: { 'Authorization': `Bearer ${currentToken}` }
         });
         const data = await res.json();
-        document.getElementById('live-check-result').innerHTML = `
-          <div class="text-emerald-700 font-semibold">✓ Consulta Oficial em Tempo Real Concluída:</div>
-          <div>Status: <strong class="text-slate-800">${data.registration_status}</strong> • Fonte: ${data.source}</div>
-          <div class="text-[10px] text-slate-400">Verificado às: ${new Date(data.checked_at).toLocaleTimeString('pt-BR')}</div>
-        `;
+        const timeStr = data.checked_at ? new Date(data.checked_at).toLocaleTimeString('pt-BR') : new Date().toLocaleTimeString('pt-BR');
+
+        if (data.success && data.verification_status !== 'UNAVAILABLE') {
+          const isAtiva = data.registration_status === 'ATIVA';
+          const badgeColor = isAtiva ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold';
+          document.getElementById('live-check-result').innerHTML = `
+            <div class="${badgeColor} flex items-center space-x-1">
+              <span>✓ Situação Oficial em Tempo Real (RFB):</span>
+              <span class="px-2 py-0.5 rounded text-[11px] ${isAtiva ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">${data.registration_status}</span>
+            </div>
+            <div class="text-[11px] text-slate-600 mt-0.5">Fonte: <strong>${data.source}</strong> • Verificado às ${timeStr}</div>
+          `;
+        } else {
+          document.getElementById('live-check-result').innerHTML = `
+            <div class="text-amber-700 font-semibold flex items-center space-x-1">
+              <span>⚠️ API Oficial RFB Indisponível no Momento:</span>
+            </div>
+            <div class="text-[11px] text-slate-600 mt-0.5">Status na base cadastral auditada: <strong class="text-slate-800">${selectedEstablishment.registration_status}</strong>.</div>
+            <div class="text-[10px] text-slate-400">Tentativa às ${timeStr}. Servidores externos indisponíveis ou limite de requisições excedido.</div>
+          `;
+        }
       } catch (e) {
-        document.getElementById('live-check-result').innerHTML = '<span class="text-red-500">Erro na consulta ao vivo.</span>';
+        document.getElementById('live-check-result').innerHTML = '<span class="text-red-500 font-semibold">Falha na conexão com o servidor de consulta.</span>';
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>Consultar RFB ao Vivo</span>';

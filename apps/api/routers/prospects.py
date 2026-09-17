@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, desc
+from sqlalchemy import or_, desc, cast, String
 from apps.api.core.database import get_db
 from apps.api.core.deps import get_current_user, record_audit
 from apps.api.models.user import User
@@ -16,13 +16,18 @@ router = APIRouter(prefix="/prospects", tags=["Prospecção e Empresas"])
 def search_prospects(
     request: Request,
     q: Optional[str] = Query(None, description="Busca textual por Razão Social, Nome Fantasia ou CNPJ"),
-    cnae: Optional[str] = Query(None, description="Código ou prefixo do CNAE"),
+    cnae: Optional[str] = Query(None, description="Código ou prefixo do CNAE (busca em primário e secundários)"),
+    division: Optional[str] = Query(None, description="Divisão CNAE (2 dígitos, ex: 20 para Químicos)"),
     city: Optional[str] = Query(None, description="Município do Rio Grande do Sul"),
+    district: Optional[str] = Query(None, description="Bairro"),
+    postal_code: Optional[str] = Query(None, description="CEP"),
+    branch_type: Optional[str] = Query(None, description="Tipo de Estabelecimento (MATRIZ / FILIAL)"),
     status: Optional[str] = Query(None, description="Situação Cadastral (ATIVA, BAIXADA, etc.)"),
     size: Optional[str] = Query(None, description="Porte Empresarial (ME, EPP, DEMAIS)"),
     tier: Optional[str] = Query(None, description="Prioridade CFQ (HIGH, MEDIUM, LOW)"),
     crq_status: Optional[str] = Query(None, description="Status interno CRQ-V"),
     min_score: Optional[float] = Query(None, description="Score mínimo (0 a 100)"),
+    min_capital: Optional[float] = Query(None, description="Capital social mínimo"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -44,12 +49,39 @@ def search_prospects(
                 )
             )
 
+    # Busca em CNAE primário E secundários (SPEC-0021)
     if cnae:
-        clean_cnae = cnae.replace(".", "").replace("/", "").replace("-", "")
-        query = query.filter(Establishment.primary_cnae.ilike(f"%{clean_cnae}%"))
+        clean_cnae = cnae.replace(".", "").replace("/", "").replace("-", "").strip()
+        query = query.filter(
+            or_(
+                Establishment.primary_cnae.ilike(f"%{clean_cnae}%"),
+                cast(Establishment.secondary_cnaes, String).ilike(f"%{clean_cnae}%")
+            )
+        )
+
+    # Divisão CNAE (hierarquia 2 dígitos)
+    if division:
+        clean_div = "".join(c for c in division if c.isdigit())
+        if clean_div:
+            query = query.filter(
+                or_(
+                    Establishment.primary_cnae.startswith(clean_div),
+                    cast(Establishment.secondary_cnaes, String).ilike(f'%"{clean_div}%')
+                )
+            )
 
     if city:
         query = query.filter(Establishment.city.ilike(f"%{city.strip()}%"))
+
+    if district:
+        query = query.filter(Establishment.district.ilike(f"%{district.strip()}%"))
+
+    if postal_code:
+        clean_cep = "".join(c for c in postal_code if c.isdigit())
+        query = query.filter(Establishment.postal_code.ilike(f"%{clean_cep}%"))
+
+    if branch_type:
+        query = query.filter(Establishment.branch_type == branch_type.upper().strip())
 
     if status:
         query = query.filter(Establishment.registration_status == status.upper())
@@ -65,6 +97,9 @@ def search_prospects(
 
     if min_score is not None:
         query = query.filter(Establishment.chemical_score >= min_score)
+
+    if min_capital is not None:
+        query = query.filter(Company.capital_social >= min_capital)
 
     # Ordenação: prioriza maior score de química, depois data de abertura mais recente
     query = query.order_by(desc(Establishment.chemical_score), desc(Establishment.id))
@@ -97,7 +132,9 @@ def search_prospects(
                 cfq_tier=est.cfq_tier,
                 cfq_rationale=est.cfq_rationale,
                 crq_status=est.crq_status,
-                opening_date=est.opening_date
+                opening_date=est.opening_date,
+                district=est.district,
+                postal_code=est.postal_code
             )
         )
 
@@ -108,7 +145,10 @@ def search_prospects(
         action="SEARCH_PROSPECTS",
         user=current_user,
         target_type="ESTABLISHMENT",
-        details={"q": q, "city": city, "cnae": cnae, "tier": tier, "total_found": total},
+        details={
+            "q": q, "cnae": cnae, "division": division, "city": city,
+            "tier": tier, "page": page, "results": len(prospects)
+        },
         ip_address=client_ip
     )
 
@@ -174,9 +214,15 @@ def get_prospect_detail(
         cfq_tier=est.cfq_tier,
         cfq_rationale=est.cfq_rationale,
         cfq_norm_reference=est.cfq_norm_reference,
+        regulatory_status=est.regulatory_status or "MANDATORY_REGISTRATION",
         crq_status=est.crq_status,
         crq_notes=est.crq_notes,
         last_inspected_at=est.last_inspected_at,
+        technical_manager=est.technical_manager,
+        technical_manager_crq=est.technical_manager_crq,
+        aft_number=est.aft_number,
+        aft_valid_until=est.aft_valid_until,
+        state_registration=est.state_registration,
         updated_at=est.updated_at
     )
 

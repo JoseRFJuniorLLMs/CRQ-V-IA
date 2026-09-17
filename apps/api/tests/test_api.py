@@ -85,12 +85,37 @@ def test_prospect_detail_and_live_check():
     assert data["cnpj"] == cnpj
     assert data["chemical_score"] >= 90.0
     assert "Resolução CFQ nº 339/2025" in data["cfq_norm_reference"]
+    assert "regulatory_status" in data
 
-    # Teste de consulta cadastral ao vivo
+    # Teste de consulta cadastral ao vivo (SPEC-0021)
     live_resp = client.get(f"/api/prospects/{cnpj}/live-check", headers=headers)
     assert live_resp.status_code == 200
     live_data = live_resp.json()
-    assert live_data["success"] is True
+    assert "verification_status" in live_data
+    if live_data["success"]:
+        assert live_data["verification_status"] == "CONFIRMED"
+    else:
+        assert live_data["verification_status"] == "UNAVAILABLE"
+        assert live_data["registration_status"] == "NAO_VERIFICADO"
+
+def test_search_by_secondary_cnae_and_division():
+    """Garante busca em CNAEs secundários e por divisão da hierarquia (SPEC-0021)."""
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Busca por CNAE 2031 (presente como secundário na Petroquímica)
+    resp_sec = client.get("/api/prospects?cnae=2031", headers=headers)
+    assert resp_sec.status_code == 200
+    data_sec = resp_sec.json()
+    assert data_sec["total"] > 0
+    assert any("92754738000180" in item["cnpj"] for item in data_sec["items"])
+
+    # Busca por Divisão 20 (Fabricação de produtos químicos)
+    resp_div = client.get("/api/prospects?division=20", headers=headers)
+    assert resp_div.status_code == 200
+    assert resp_div.json()["total"] > 0
+
 
 def test_saved_lists_and_items():
     login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})

@@ -37,21 +37,43 @@ CFQ_CNAE_RULES = {
     "2110-6": {"tier": "HIGH", "weight": 90, "desc": "Fabricação de produtos farmoquímicos", "rationale": "Síntese de insumos farmacêuticos ativos (IFAs), controle químico direto."},
 
     # TIER 2: MÉDIA RELEVÂNCIA / ATIVIDADES INDUSTRIAIS E SERVIÇOS TÉCNICOS (Score 55 - 79)
-    # Tratamento de efluentes, galvanoplastia, laboratórios, alimentos com aditivos, curtume
+    # Tratamento de efluentes, galvanoplastia, laboratórios, alimentos com aditivos, celulose, curtume
     "1510-6": {"tier": "MEDIUM", "weight": 70, "desc": "Curtimento e outras preparações de couro", "rationale": "Processo químico intensivo de curtimento (cromo/tanino) e tratamento de efluentes."},
+    "1710-9": {"tier": "MEDIUM", "weight": 75, "desc": "Fabricação de celulose e pastas químicas", "rationale": "Digestão química de madeira, branqueamento com cloro/dióxido e recuperação de licores."},
+    "1721-4": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de papel e papelão", "rationale": "Colagem, cargas minerais, aditivação química e controle de pH e retenção."},
     "1921-7": {"tier": "MEDIUM", "weight": 75, "desc": "Fabricação de produtos do refino de petróleo", "rationale": "Processamento e controle de combustíveis e óleos."},
     "1922-5": {"tier": "MEDIUM", "weight": 75, "desc": "Rerrefino de óleos lubrificantes", "rationale": "Reciclagem e reprocessamento químico de lubrificantes usados."},
+    "2211-1": {"tier": "MEDIUM", "weight": 70, "desc": "Fabricação de pneumáticos e câmaras-de-ar", "rationale": "Vulcanização e aditivação de elastômeros e negro de fumo."},
+    "2219-6": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de artefatos de borracha", "rationale": "Formulação elastomérica e processos térmicos de cura."},
+    "2221-8": {"tier": "MEDIUM", "weight": 70, "desc": "Fabricação de laminados plásticos", "rationale": "Extrusão e termomoldagem de resinas poliméricas."},
+    "2222-6": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de embalagens de material plástico", "rationale": "Transformação plástica e uso de masterbatches colorantes."},
+    "2229-3": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de artefatos plásticos diversos", "rationale": "Injeção, extrusão e reciclagem de resinas sintéticas."},
+    "2311-7": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de vidro plano e de segurança", "rationale": "Fusão de silicatos, têmpera química e tratamento superficial."},
+    "2312-5": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de embalagens de vidro", "rationale": "Fusão vítrea e controle de composição química de matérias-primas."},
+    "2320-6": {"tier": "MEDIUM", "weight": 75, "desc": "Fabricação de cimento", "rationale": "Calcinação e clinquerização de calcário e argila, controle de óxidos."},
+    "2341-9": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de produtos cerâmicos refratários", "rationale": "Formulações cerâmicas refratárias submetidas a alta temperatura."},
+    "2411-3": {"tier": "MEDIUM", "weight": 70, "desc": "Siderurgia e refino de ferro-gusa", "rationale": "Redução e oxidação em alto-forno, controle de ligas e escórias."},
+    "2441-5": {"tier": "MEDIUM", "weight": 70, "desc": "Metalurgia de metais não-ferrosos", "rationale": "Eletro-obtenção, lixiviação e refino químico de cobre, alumínio e chumbo."},
     "2539-0": {"tier": "MEDIUM", "weight": 70, "desc": "Serviços de usinagem, solda e tratamento de metais (Galvanoplastia)", "rationale": "Banhos galvânicos, anodização e desengraxe exigem controle químico de soluções."},
     "3600-6": {"tier": "MEDIUM", "weight": 75, "desc": "Captação, tratamento e distribuição de água", "rationale": "Controle físico-químico da potabilidade e dosagem de reagentes (coagulantes/cloro)."},
     "3701-1": {"tier": "MEDIUM", "weight": 75, "desc": "Gestão de redes de esgoto e tratamento de efluentes", "rationale": "Operação de ETEs industriais e municipais com controle de DBO/DQO e metais."},
     "3811-4": {"tier": "MEDIUM", "weight": 60, "desc": "Coleta e tratamento de resíduos perigosos", "rationale": "Manipulação e destinação de resíduos químicos industriais."},
     "3821-1": {"tier": "MEDIUM", "weight": 65, "desc": "Tratamento e disposição de resíduos perigosos", "rationale": "Incineração, coprocessamento e neutralização química de passivos."},
+    "3832-7": {"tier": "MEDIUM", "weight": 65, "desc": "Recuperação de materiais plásticos (Reciclagem)", "rationale": "Descontaminação, extrusão e pelotização de polímeros pós-consumo."},
     "7120-1": {"tier": "MEDIUM", "weight": 75, "desc": "Testes e análises técnicas (Laboratórios)", "rationale": "Laboratórios de ensaios físico-químicos e cromatografia devem possuir registro no CRQ."},
     "7210-0": {"tier": "MEDIUM", "weight": 70, "desc": "Pesquisa e desenvolvimento experimental em ciências físicas e naturais", "rationale": "P&D com bancada química, síntese e testes moleculares."},
+    "1031-7": {"tier": "MEDIUM", "weight": 60, "desc": "Fabricação de conservas de frutas e legumes", "rationale": "Controle de acidez, conservantes químicos e pasteurização."},
+    "1041-4": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de óleos vegetais em bruto", "rationale": "Extração por solventes químicos (hexano) e degomagem."},
+    "1042-2": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de óleos vegetais refinados", "rationale": "Neutralização química, clarificação e desodorização de óleos."},
+    "1051-2": {"tier": "MEDIUM", "weight": 60, "desc": "Preparação do leite e fabricação de laticínios", "rationale": "Fermentação lática, coagulação enzimática e controle analítico de acidez/gordura."},
+    "1062-7": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de amidos e féculas de vegetais", "rationale": "Modificação química de amidos para uso alimentício e industrial."},
     "1066-0": {"tier": "MEDIUM", "weight": 60, "desc": "Fabricação de alimentos para animais (rações)", "rationale": "Aditivação mineral, premixes químicos e controle de micotoxinas."},
+    "1099-6": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de vinagres e fermentos químicos/biológicos", "rationale": "Fermentação acética e formulação de fermentos e aditivos."},
     "1111-9": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de aguardentes e outras bebidas destiladas", "rationale": "Fermentação e destilação com análises físico-químicas de graduação e congêneres."},
     "1112-7": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de vinho", "rationale": "Enologia e controle analítico de mostos, sulfitação e fermentação (Polo Serra Gaúcha/RS)."},
     "1113-5": {"tier": "MEDIUM", "weight": 65, "desc": "Fabricação de cervejas e chopes", "rationale": "Bioquímica de malteação, mosturação e controle microbiológico/físico-químico."},
+    "1610-2": {"tier": "MEDIUM", "weight": 60, "desc": "Desdobramento e tratamento químico de madeira", "rationale": "Impregnação com sais hidrossolúveis (CCA/CCB) em autoclave contra xilófagos."},
+    "2121-1": {"tier": "MEDIUM", "weight": 75, "desc": "Fabricação de medicamentos alopáticos para uso humano", "rationale": "Controle físico-químico de formulações e ensaios analíticos de teor e dissolução."},
 
     # TIER 3: BAIXA RELEVÂNCIA / COMÉRCIO E APOIO (Score 30 - 54)
     # Comércio atacadista de químicos, defensivos, embalagens, equipamentos de laboratório
@@ -84,8 +106,9 @@ def match_cnae_prefix(cnae_clean: str) -> Tuple[str, dict]:
 
 def classify_establishment(primary_cnae: str, secondary_cnaes: List[str] = None) -> Dict:
     """
-    Analisa o CNAE primário e secundários conforme a Resolução CFQ 339/2025.
-    Retorna score (0-100), tier, justificativa legível e lista de enquadramentos.
+    Analisa o CNAE primário e secundários conforme a Resolução Normativa CFQ 339/2025.
+    Retorna score (0-100), prioridade fiscal (HIGH/MEDIUM/LOW), status regulatório 
+    (MANDATORY_REGISTRATION, CHEMICAL_SUPPORT_ACTIVITY, SERVICE_TO_THIRD_PARTIES) e justificativa explicável.
     """
     if secondary_cnaes is None:
         secondary_cnaes = []
@@ -94,15 +117,20 @@ def classify_establishment(primary_cnae: str, secondary_cnaes: List[str] = None)
     max_score = 0
     highest_tier = "NONE"
     primary_rationale = ""
+    primary_matched = False
+    is_service = False
 
     # Avalia CNAE Primário
     cnae_norm = normalize_cnae(primary_cnae)
     matched_key, rule = match_cnae_prefix(cnae_norm)
     
     if rule:
+        primary_matched = True
         max_score = rule["weight"]
         highest_tier = rule["tier"]
         primary_rationale = f"CNAE Primário ({cnae_norm} - {rule['desc']}): {rule['rationale']}"
+        if "7120" in cnae_norm or "7210" in cnae_norm or "2539" in cnae_norm:
+            is_service = True
         matched_factors.append({
             "cnae": cnae_norm,
             "type": "PRIMARY",
@@ -123,7 +151,6 @@ def classify_establishment(primary_cnae: str, secondary_cnaes: List[str] = None)
             sec_weight = int(sec_rule["weight"] * 0.85)
             if sec_weight > max_score:
                 max_score = sec_weight
-                # Se o primário não era high mas um secundário forte for, eleva o tier
                 if highest_tier in ("NONE", "LOW") and sec_rule["tier"] in ("HIGH", "MEDIUM"):
                     highest_tier = sec_rule["tier"]
             matched_factors.append({
@@ -139,9 +166,21 @@ def classify_establishment(primary_cnae: str, secondary_cnaes: List[str] = None)
         return {
             "score": 5.0,
             "tier": "NONE",
+            "fiscal_priority": "LOW",
+            "regulatory_status": "OUT_OF_SCOPE",
             "rationale": "Empresa sem atividade econômica com indícios diretos de Química pela Resolução CFQ 339/2025.",
             "factors": []
         }
+
+    # Determina o status regulatório segundo Art. 3º e 4º da RN CFQ 339/2025
+    if is_service:
+        reg_status = "SERVICE_TO_THIRD_PARTIES"
+    elif primary_matched and highest_tier in ("HIGH", "MEDIUM"):
+        reg_status = "MANDATORY_REGISTRATION"
+    elif not primary_matched and matched_factors:
+        reg_status = "CHEMICAL_SUPPORT_ACTIVITY"
+    else:
+        reg_status = "MANDATORY_REGISTRATION" if highest_tier == "HIGH" else "CHEMICAL_SUPPORT_ACTIVITY"
 
     # Gera justificativa consolidada
     consolidated_rationale = primary_rationale
@@ -152,6 +191,9 @@ def classify_establishment(primary_cnae: str, secondary_cnaes: List[str] = None)
     return {
         "score": float(max_score),
         "tier": highest_tier,
+        "fiscal_priority": highest_tier,
+        "regulatory_status": reg_status,
         "rationale": consolidated_rationale,
         "factors": matched_factors
     }
+

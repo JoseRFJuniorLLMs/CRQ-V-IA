@@ -437,6 +437,15 @@ def seed_companies(db: Session):
                 secondary_cnaes=item["secondary_cnaes"]
             )
 
+            # Define RT e AFT realistas com base na situação de registro no CRQ-V
+            is_reg = item["crq_status"] == "REGISTRADA"
+            c_prefix = cnpj_clean[:6]
+            tech_man = f"Dra. Mariana Dornelles (CRQ 0520{c_prefix[:4]})" if is_reg else None
+            tech_crq = f"0520{c_prefix[:4]}-V" if is_reg else None
+            aft_num = f"AFT-2026-{c_prefix[:5]}" if is_reg else None
+            aft_val = "2026-12-31" if is_reg else None
+            ie_num = f"096/{cnpj_clean[3:11]}"
+
             est = Establishment(
                 company_id=company.id,
                 cnpj=cnpj_clean,
@@ -457,10 +466,17 @@ def seed_companies(db: Session):
                 chemical_score=classification["score"],
                 cfq_tier=classification["tier"],
                 cfq_rationale=classification["rationale"],
-                crq_status=item["crq_status"]
+                regulatory_status=classification.get("regulatory_status", "MANDATORY_REGISTRATION"),
+                crq_status=item["crq_status"],
+                technical_manager=tech_man,
+                technical_manager_crq=tech_crq,
+                aft_number=aft_num,
+                aft_valid_until=aft_val,
+                state_registration=ie_num
             )
             db.add(est)
             est_count += 1
 
     db.commit()
     print(f"[Seed] {est_count} estabelecimentos do Rio Grande do Sul cadastrados e classificados.")
+

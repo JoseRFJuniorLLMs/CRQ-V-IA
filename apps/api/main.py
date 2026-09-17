@@ -42,6 +42,11 @@ app.include_router(exports.router, prefix=settings.API_PREFIX)
 app.include_router(stats.router, prefix=settings.API_PREFIX)
 app.include_router(audit.router, prefix=settings.API_PREFIX)
 
+# Monta imagens institucionais
+img_dir = Path(__file__).resolve().parents[2] / "img"
+if img_dir.exists():
+    app.mount("/img", StaticFiles(directory=str(img_dir)), name="img")
+
 # Monta frontend estático se compilado
 web_dist = Path(__file__).resolve().parent.parent / "web" / "dist"
 if web_dist.exists() and (web_dist / "index.html").exists():

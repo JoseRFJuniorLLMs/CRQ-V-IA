@@ -1,0 +1,213 @@
+/* ==========================================================================
+   TEMA E IDENTIDADE VISUAL OFICIAL DO CRQ-V (5ª REGIÃO - RIO GRANDE DO SUL)
+   Padronização visual de alta fidelidade baseada no Portal Oficial: https://www.crqv.org.br
+   ========================================================================== */
+
+:root {
+  /* Paleta Oficial do Portal do CRQ-V */
+  --crqv-blue-deep: #0B244F;           /* Azul Noturno / Topo Superior */
+  --crqv-blue-dark: #1B3D79;           /* rgb(27, 61, 121) - Azul Marinho Institucional (.btn-beneficio) */
+  --crqv-blue-primary: #1183C6;        /* rgb(17, 131, 198) - Azul Primário Oficial (--color-primary) */
+  --crqv-blue-light: #EBF4FA;          /* Azul Gelo / Destaques suaves */
+  --crqv-blue-border: #BCD5EB;         /* Borda de campos e cards */
+  
+  --crqv-green-accent: #72B42D;        /* rgb(114, 180, 45) - Verde Químico Oficial (.btn-associado / Meu CRQ-V) */
+  --crqv-green-hover: #609C21;         /* rgb(96, 156, 33) - Verde Hover */
+  --crqv-green-light: #F0F8E8;         /* Fundo suave verde */
+
+  --crqv-text-main: #2D3748;           /* Texto escuro legível */
+  --crqv-text-muted: #64748B;          /* Texto secundário */
+  --crqv-bg-main: #F4F7FB;             /* Fundo do sistema */
+  --crqv-card-bg: #FFFFFF;             /* Fundo dos cartões */
+  --crqv-border: #E2E8F0;              /* Borda sutil */
+}
+
+/* Tipografia Base Roboto */
+body {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--crqv-text-main);
+  background-color: var(--crqv-bg-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* BARRA SUPERIOR DE ACESSIBILIDADE E GOVERNO (Padrão Gov / CRQ-V) */
+.crqv-top-bar {
+  background-color: #091C3E;
+  color: #CBD5E1;
+  font-size: 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px 0;
+}
+
+.crqv-top-bar a {
+  color: #E2E8F0;
+  transition: color 0.2s ease;
+  text-decoration: none;
+}
+
+.crqv-top-bar a:hover {
+  color: var(--crqv-green-accent);
+}
+
+/* CABEÇALHO PRINCIPAL (.bg-topo OFICIAL) */
+.crqv-header-main {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--crqv-border);
+  padding: 10px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.crqv-logo {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.crqv-logo:hover {
+  transform: scale(1.02);
+}
+
+.crqv-logo-header {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+.crqv-logo-login {
+  height: 90px;
+  width: auto;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+/* BOTÕES ESTILO PORTAL CRQ-V */
+/* 1. Botão Verde (Estilo Meu CRQ-V / .btn-meu-crq) */
+.btn-crqv-green {
+  background-color: var(--crqv-green-accent) !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(114, 180, 45, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-crqv-green:hover {
+  background-color: var(--crqv-green-hover) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 8px rgba(96, 156, 33, 0.35);
+  transform: translateY(-1px);
+}
+
+/* 2. Botão Azul Institucional (.btn-beneficio / #1B3D79) */
+.btn-crqv-navy {
+  background-color: var(--crqv-blue-dark) !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(27, 61, 121, 0.25);
+}
+
+.btn-crqv-navy:hover {
+  background-color: var(--crqv-blue-deep) !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+}
+
+/* 3. Botão Azul Primário (#1183C6) */
+.btn-crqv-blue {
+  background-color: var(--crqv-blue-primary) !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(17, 131, 198, 0.25);
+}
+
+.btn-crqv-blue:hover {
+  background-color: #0E6FA8 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+}
+
+/* BARRA DE NAVEGAÇÃO INSTITUCIONAL */
+.crqv-navbar {
+  background-color: var(--crqv-blue-dark);
+  background: linear-gradient(90deg, #1B3D79 0%, #153467 100%);
+  border-bottom: 3.5px solid var(--crqv-green-accent);
+}
+
+.crqv-nav-tab {
+  color: #E2E8F0;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease-in-out;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.crqv-nav-tab:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
+.crqv-nav-tab.tab-active, .tab-active {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  box-shadow: inset 0 -3px 0 0 var(--crqv-green-accent) !important;
+}
+
+.tab-inactive {
+  color: #CBD5E1 !important;
+}
+
+.tab-inactive:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+
+/* CARDS E PAINÉIS */
+.crqv-card {
+  background: #FFFFFF;
+  border: 1px solid var(--crqv-border);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.crqv-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border-color: #CBD5E1;
+}
+
+/* OVERRIDES DO TAILWIND PARA CONSISTÊNCIA DE MARCA */
+.bg-emerald-600 {
+  background-color: var(--crqv-green-accent) !important;
+}
+.bg-emerald-700 {
+  background-color: #5F9A24 !important;
+}
+.hover\:bg-emerald-700:hover, .hover\:bg-emerald-600:hover, .hover\:bg-emerald-500:hover {
+  background-color: var(--crqv-green-hover) !important;
+}
+.text-emerald-600, .text-emerald-500, .text-emerald-400 {
+  color: var(--crqv-green-accent) !important;
+}
+.border-emerald-600, .border-emerald-500 {
+  border-color: var(--crqv-green-accent) !important;
+}
+.focus\:ring-emerald-500:focus {
+  --tw-ring-color: var(--crqv-blue-primary) !important;
+  border-color: var(--crqv-blue-primary) !important;
+}
+
+

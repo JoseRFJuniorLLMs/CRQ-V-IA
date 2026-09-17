@@ -21,6 +21,9 @@ class ProspectListItem(BaseModel):
     crq_status: str
     opening_date: Optional[str] = None
 
+    district: Optional[str] = None
+    postal_code: Optional[str] = None
+
     class Config:
         from_attributes = True
 
@@ -64,12 +67,19 @@ class ProspectDetail(BaseModel):
     cfq_tier: str
     cfq_rationale: Optional[str] = None
     cfq_norm_reference: str
+    regulatory_status: Optional[str] = "MANDATORY_REGISTRATION"
     
-    # CRQ-V Interno
+    # CRQ-V Interno, RT e AFT
     crq_status: str
     crq_notes: Optional[str] = None
     last_inspected_at: Optional[datetime] = None
+    technical_manager: Optional[str] = None
+    technical_manager_crq: Optional[str] = None
+    aft_number: Optional[str] = None
+    aft_valid_until: Optional[str] = None
+    state_registration: Optional[str] = None
     updated_at: datetime
 
     class Config:
         from_attributes = True
+

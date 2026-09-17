@@ -52,6 +52,15 @@ class Establishment(Base):
     crq_notes = Column(Text, nullable=True)
     last_inspected_at = Column(DateTime, nullable=True)
     
+    # Responsabilidade Técnica e AFT (Art. 3º e 4º RN CFQ 339/2025)
+    technical_manager = Column(String(255), nullable=True) # Nome do Químico Responsável Técnico
+    technical_manager_crq = Column(String(50), nullable=True) # Nº Registro CRQ-V do RT
+    aft_number = Column(String(50), nullable=True) # Anotação de Função Técnica (AFT)
+    aft_valid_until = Column(String(10), nullable=True) # Validade da AFT (máx 1 ano)
+    state_registration = Column(String(50), nullable=True) # Inscrição Estadual (SEFAZ/RS)
+    regulatory_status = Column(String(50), default="MANDATORY_REGISTRATION") # MANDATORY_REGISTRATION, CHEMICAL_SUPPORT_ACTIVITY, SERVICE_TO_THIRD_PARTIES
+    
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     company = relationship("Company", back_populates="establishments")
+
