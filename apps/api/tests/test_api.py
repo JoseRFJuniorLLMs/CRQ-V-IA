@@ -387,21 +387,36 @@ def test_saved_lists_complete_lifecycle():
     prospect_resp = client.get("/api/prospects?page=1&page_size=1", headers=headers)
     est_id = prospect_resp.json()["items"][0]["id"]
 
-    # 3. Adiciona item à lista
+    # 3. Adiciona item à lista com fiscal atribuído
     add_item = client.post(f"/api/lists/{list_id}/items", json={
         "establishment_id": est_id,
         "priority": "ALTA",
+        "assigned_inspector": "fiscal1@crqv.org.br",
         "notes": "Verificar responsável técnico in loco"
     }, headers=headers)
     assert add_item.status_code == 200
     item_id = add_item.json()["id"]
+    assert add_item.json()["assigned_inspector"] == "fiscal1@crqv.org.br"
 
-    # 4. Consulta itens paginados da lista
+    # 4. Consulta itens paginados da lista e confere campos operacionais
     items_resp = client.get(f"/api/lists/{list_id}/items?page=1&page_size=5", headers=headers)
     assert items_resp.status_code == 200
     items_data = items_resp.json()
     assert items_data["total"] >= 1
-    assert any(i["id"] == item_id for i in items_data["items"])
+    found_item = next((i for i in items_data["items"] if i["id"] == item_id), None)
+    assert found_item is not None
+    assert found_item["assigned_inspector"] == "fiscal1@crqv.org.br"
+    assert found_item["establishment"] is not None
+
+    # 4.1 Atualiza status fiscal e reatribui fiscal
+    patch_resp = client.patch(f"/api/lists/{list_id}/items/{item_id}", json={
+        "fiscal_status": "INSPECTED",
+        "assigned_inspector": "fiscal2@crqv.org.br",
+        "notes": "Vistoria concluída, termo lavrado"
+    }, headers=headers)
+    assert patch_resp.status_code == 200
+    assert patch_resp.json()["fiscal_status"] == "INSPECTED"
+    assert patch_resp.json()["assigned_inspector"] == "fiscal2@crqv.org.br"
 
     # 5. Remove item da lista
     del_item = client.delete(f"/api/lists/{list_id}/items/{item_id}", headers=headers)

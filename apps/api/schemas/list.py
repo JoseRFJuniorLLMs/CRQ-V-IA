@@ -6,11 +6,13 @@ from apps.api.schemas.prospect import ProspectListItem
 class SavedListItemCreate(BaseModel):
     establishment_id: int
     priority: Optional[str] = "MEDIA" # ALTA, MEDIA, BAIXA
+    assigned_inspector: Optional[str] = None
     notes: Optional[str] = None
 
 class SavedListItemUpdate(BaseModel):
-    fiscal_status: Optional[str] = None # PENDENTE, NOTIFICADA, EM_INSPECAO, REGULARIZADA, DISPENSADA
-    priority: Optional[str] = None
+    fiscal_status: Optional[str] = None # PENDENTE, EM_ANALISE, NOTIFICADA, AUTUADA, CONCLUIDA, DISPENSADA, NEW, REVIEWING, SELECTED, DISMISSED, EXPORTED, INSPECTED
+    priority: Optional[str] = None # ALTA, MEDIA, BAIXA
+    assigned_inspector: Optional[str] = None
     notes: Optional[str] = None
 
 class SavedListItemResponse(BaseModel):
@@ -19,6 +21,7 @@ class SavedListItemResponse(BaseModel):
     establishment_id: int
     fiscal_status: str
     priority: str
+    assigned_inspector: Optional[str] = None
     notes: Optional[str] = None
     added_at: datetime
     updated_at: datetime

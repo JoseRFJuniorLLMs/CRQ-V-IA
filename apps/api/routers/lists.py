@@ -100,8 +100,15 @@ def get_list_items(
                 "branch_type": est.branch_type,
                 "registration_status": est.registration_status,
                 "primary_cnae": est.primary_cnae,
+                "street": est.street,
+                "number": est.number,
+                "complement": est.complement,
+                "district": est.district,
+                "postal_code": est.postal_code,
                 "city": est.city,
                 "state": est.state,
+                "phone": est.phone,
+                "email": est.email,
                 "company_size": est.company.company_size,
                 "capital_social": est.company.capital_social,
                 "chemical_score": est.chemical_score,
@@ -116,6 +123,7 @@ def get_list_items(
             "establishment_id": item.establishment_id,
             "fiscal_status": item.fiscal_status,
             "priority": item.priority,
+            "assigned_inspector": item.assigned_inspector,
             "notes": item.notes,
             "added_at": item.added_at.isoformat() if item.added_at else None,
             "updated_at": item.updated_at.isoformat() if item.updated_at else None,
@@ -160,6 +168,7 @@ def add_item_to_list(
         list_id=list_id,
         establishment_id=payload.establishment_id,
         priority=payload.priority or "MEDIA",
+        assigned_inspector=payload.assigned_inspector,
         notes=payload.notes,
         fiscal_status="PENDENTE"
     )
@@ -184,6 +193,7 @@ def add_item_to_list(
         establishment_id=item.establishment_id,
         fiscal_status=item.fiscal_status,
         priority=item.priority,
+        assigned_inspector=item.assigned_inspector,
         notes=item.notes,
         added_at=item.added_at,
         updated_at=item.updated_at,
@@ -206,11 +216,20 @@ def update_item_status(
         item.fiscal_status = payload.fiscal_status.upper()
     if payload.priority:
         item.priority = payload.priority.upper()
+    if payload.assigned_inspector is not None:
+        item.assigned_inspector = payload.assigned_inspector.strip() if payload.assigned_inspector.strip() else None
     if payload.notes is not None:
         item.notes = payload.notes
 
     db.commit()
-    return {"success": True, "item_id": item.id, "fiscal_status": item.fiscal_status}
+    return {
+        "success": True, 
+        "item_id": item.id, 
+        "fiscal_status": item.fiscal_status,
+        "priority": item.priority,
+        "assigned_inspector": item.assigned_inspector,
+        "notes": item.notes
+    }
 
 @router.delete("/{list_id}/items/{item_id}")
 def remove_item(

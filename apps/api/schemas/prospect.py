@@ -21,6 +21,9 @@ class ProspectListItem(BaseModel):
     crq_status: str
     opening_date: Optional[str] = None
 
+    street: Optional[str] = None
+    number: Optional[str] = None
+    complement: Optional[str] = None
     district: Optional[str] = None
     postal_code: Optional[str] = None
 

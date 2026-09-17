@@ -24,6 +24,7 @@ class SavedListItem(Base):
     # Status na fila de fiscalização
     fiscal_status = Column(String(50), default="PENDENTE", index=True) # PENDENTE, NOTIFICADA, EM_INSPECAO, REGULARIZADA, DISPENSADA
     priority = Column(String(20), default="MEDIA") # ALTA, MEDIA, BAIXA
+    assigned_inspector = Column(String(150), nullable=True) # E-mail ou nome do fiscal atribuído
     notes = Column(Text, nullable=True)
     
     added_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
