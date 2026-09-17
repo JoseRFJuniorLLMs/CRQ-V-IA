@@ -1,10 +1,32 @@
+version: '3.8'
+
 services:
+  app:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    container_name: crqvia_app
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://crqvia:crqvia_prod_pwd@postgres:5432/crqvia
+      - SECRET_KEY=crqv_super_secret_jwt_key_2026_fiscalizacao_rs
+      - DEBUG=False
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - app_data:/app/data
+
   postgres:
     image: postgis/postgis:16-3.4
+    container_name: crqvia_postgres
+    restart: always
     environment:
       POSTGRES_DB: crqvia
       POSTGRES_USER: crqvia
-      POSTGRES_PASSWORD: crqvia_dev_only
+      POSTGRES_PASSWORD: crqvia_prod_pwd
     ports:
       - "5432:5432"
     healthcheck:
@@ -17,3 +39,4 @@ services:
 
 volumes:
   pgdata:
+  app_data:

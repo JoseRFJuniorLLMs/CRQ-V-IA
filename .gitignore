@@ -21,6 +21,8 @@ out/
 *.parquet
 *.csv.gz
 *.zip
+*.db
+*.sqlite
 
 # OS/IDE
 .DS_Store

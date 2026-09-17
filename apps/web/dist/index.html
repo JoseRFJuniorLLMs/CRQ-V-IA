@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRQ-V-IA | Plataforma de Prospecção Fiscal Inteligente (RS)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js para Dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .badge-high { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .badge-medium { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .badge-low { background-color: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
+    .badge-none { background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- TOP BAR GOVERNAMENTAL -->
+  <header class="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-gradient-to-tr from-emerald-500 to-teal-400 p-2 rounded-lg shadow">
+          <i data-lucide="flask-conical" class="w-6 h-6 text-slate-950 font-bold"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-200">CRQ-V-IA</span>
+            <span class="text-xs bg-emerald-950 text-emerald-300 border border-emerald-700 px-2 py-0.5 rounded font-mono font-medium">Pregão 0005/2026</span>
+          </div>
+          <p class="text-xs text-slate-400">Conselho Regional de Química da 5ª Região • Rio Grande do Sul</p>
+        </div>
+      </div>
+
+      <!-- NAV TABS -->
+      <nav id="nav-tabs" class="hidden md:flex items-center space-x-1">
+        <button onclick="switchTab('prospects')" id="tab-btn-prospects" class="px-3 py-2 text-sm font-medium rounded-md bg-slate-800 text-white flex items-center space-x-1.5 transition">
+          <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
+          <span>Prospecção</span>
+        </button>
+        <button onclick="switchTab('lists')" id="tab-btn-lists" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
+          <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-400"></i>
+          <span>Roteiros Fiscais</span>
+        </button>
+        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 text-emerald-400"></i>
+          <span>Painel</span>
+        </button>
+        <button onclick="switchTab('audit')" id="tab-btn-audit" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+          <span>Auditoria LGPD</span>
+        </button>
+        <button onclick="switchTab('help')" id="tab-btn-help" class="px-3 py-2 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white flex items-center space-x-1.5 transition">
+          <i data-lucide="book-open" class="w-4 h-4 text-emerald-400"></i>
+          <span>Manual & Suporte</span>
+        </button>
+      </nav>
+
+      <!-- USER & CONCURRENCY BADGE -->
+      <div id="user-controls" class="flex items-center space-x-3">
+        <!-- Concurrency status pill (Garantia TR-007) -->
+        <div id="concurrency-pill" class="hidden sm:flex items-center space-x-1.5 bg-slate-800/80 border border-slate-700 px-2.5 py-1 rounded-full text-xs text-slate-300" title="Controle de Acessos Simultâneos (TR item 1.2.3.4)">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Sessões Ativas: <strong id="sessions-count" class="text-emerald-400">2</strong></span>
+        </div>
+
+        <div id="user-info-box" class="hidden items-center space-x-2 border-l border-slate-700 pl-3">
+          <div class="text-right">
+            <div id="user-name" class="text-xs font-semibold text-slate-200 truncate max-w-[140px]">Fiscal de Campo</div>
+            <div id="user-role" class="text-[10px] text-emerald-400 font-mono uppercase">Fiscal CRQ-V</div>
+          </div>
+          <button onclick="logout()" title="Encerrar Sessão" class="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <button id="login-top-btn" onclick="openLoginModal()" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-3 py-1.5 rounded-md transition shadow">
+          Entrar no Sistema
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- 1. ABA DE PROSPECÇÃO (DEFAULT) -->
+    <section id="view-prospects" class="space-y-6">
+      <!-- CABEÇALHO DA SELEÇÃO -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+            <span>Prospecção de Empresas com Potencial Químico no RS</span>
+            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-semibold">Resolução CFQ 339/2025</span>
+          </h1>
+          <p class="text-sm text-slate-500 mt-1">
+            Filtros regulatórios sobre a base de estabelecimentos ativos no Rio Grande do Sul para subsidiar o planejamento fiscalizatório.
+          </p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="exportData('csv')" class="inline-flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-lg border border-slate-300 transition">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
+            <span>Exportar CSV</span>
+          </button>
+          <button onclick="exportData('xlsx')" class="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Exportar Excel (XLSX)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- GRID PRINCIPAL (LAYOUT SPEC-0012: FILTROS À ESQUERDA + TABELA CENTRAL) -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- FILTROS (1 COLUNA) -->
+        <aside class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-5 h-fit">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h2 class="font-bold text-slate-800 flex items-center space-x-2 text-sm">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-emerald-600"></i>
+              <span>Filtros do Edital</span>
+            </h2>
+            <button onclick="resetFilters()" class="text-xs text-slate-500 hover:text-emerald-600 underline">Limpar</button>
+          </div>
+
+          <!-- Busca Textual -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Razão Social, Nome Fantasia ou CNPJ</label>
+            <div class="relative">
+              <input type="text" id="filter-q" oninput="debounceSearch()" placeholder="Ex: Petroquímica, Tintas..." class="w-full pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5"></i>
+            </div>
+          </div>
+
+          <!-- Município RS -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Município (Rio Grande do Sul)</label>
+            <select id="filter-city" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="">Todos os Municípios do RS</option>
+              <option value="Porto Alegre">Porto Alegre</option>
+              <option value="Canoas">Canoas</option>
+              <option value="Triunfo">Triunfo (Polo Petroquímico)</option>
+              <option value="Caxias do Sul">Caxias do Sul (Serra)</option>
+              <option value="Novo Hamburgo">Novo Hamburgo (Vale dos Sinos)</option>
+              <option value="São Leopoldo">São Leopoldo</option>
+              <option value="Bento Gonçalves">Bento Gonçalves</option>
+              <option value="Passo Fundo">Passo Fundo</option>
+              <option value="Pelotas">Pelotas</option>
+              <option value="Rio Grande">Rio Grande</option>
+              <option value="Gramado">Gramado</option>
+              <option value="Estância Velha">Estância Velha</option>
+              <option value="Santo Ângelo">Santo Ângelo</option>
+            </select>
+          </div>
+
+          <!-- Prioridade Regulatório CFQ -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Prioridade CFQ 339/2025</label>
+            <select id="filter-tier" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="">Todas as Prioridades</option>
+              <option value="HIGH">Alta / Registro Obrigatório (80 - 100)</option>
+              <option value="MEDIUM">Média / Atividade Técnica (55 - 79)</option>
+              <option value="LOW">Baixa / Comércio e Apoio (30 - 54)</option>
+            </select>
+          </div>
+
+          <!-- Porte Empresarial -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Porte Empresarial (RFB)</label>
+            <select id="filter-size" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="">Todos os Portes</option>
+              <option value="ME">Microempresa (ME)</option>
+              <option value="EPP">Empresa de Pequeno Porte (EPP)</option>
+              <option value="DEMAIS">Demais / Médio e Grande Porte</option>
+            </select>
+          </div>
+
+          <!-- Situação Cadastral RFB -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Situação Cadastral (RFB)</label>
+            <select id="filter-status" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="ATIVA">Somente Ativas</option>
+              <option value="BAIXADA">Baixadas / Extintas</option>
+              <option value="">Todas as Situações</option>
+            </select>
+          </div>
+
+          <!-- Status no CRQ-V -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Situação no CRQ-V</label>
+            <select id="filter-crq" onchange="loadProspects(1)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="">Todas as Situações no CRQ-V</option>
+              <option value="NAO_CADASTRADA">Não Cadastrada (Alvo Fiscal)</option>
+              <option value="EM_FISCALIZACAO">Em Fiscalização / Processo Aberto</option>
+              <option value="REGISTRADA">Já Registrada com Resp. Técnico</option>
+              <option value="DISPENSADA">Dispensada de Registro</option>
+            </select>
+          </div>
+
+          <!-- Score Mínimo -->
+          <div>
+            <div class="flex justify-between text-xs text-slate-700 mb-1">
+              <span class="font-semibold">Score Químico Mínimo:</span>
+              <span id="score-val" class="font-bold text-emerald-600">0</span>
+            </div>
+            <input type="range" id="filter-score" min="0" max="95" step="5" value="0" oninput="document.getElementById('score-val').innerText = this.value; loadProspects(1)" class="w-full accent-emerald-600">
+          </div>
+        </aside>
+
+        <!-- RESULTADOS (3 COLUNAS) -->
+        <section class="lg:col-span-3 space-y-4">
+          <!-- BARRA DE CONTAGEM E ORDENAÇÃO -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 px-5 py-3 flex items-center justify-between text-xs text-slate-600">
+            <div>
+              <span>Encontradas <strong id="prospects-total" class="text-slate-900 font-bold">0</strong> empresas com potencial fiscalizatório no RS</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span>Ordenação:</span>
+              <span class="font-semibold text-slate-900">Score Regulatório CFQ (Decrescente)</span>
+            </div>
+          </div>
+
+          <!-- TABELA DE RESULTADOS -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="py-3.5 px-4">Empresa / CNPJ</th>
+                    <th class="py-3.5 px-3">Localização (RS)</th>
+                    <th class="py-3.5 px-3">CNAE Principal</th>
+                    <th class="py-3.5 px-3 text-center">Score / CFQ</th>
+                    <th class="py-3.5 px-3 text-center">Status CRQ-V</th>
+                    <th class="py-3.5 px-4 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="prospects-table-body" class="divide-y divide-slate-100">
+                  <!-- Linhas preenchidas via JS -->
+                  <tr>
+                    <td colspan="6" class="text-center py-8 text-slate-400">Carregando dados da base do RS...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- PAGINAÇÃO -->
+            <div class="bg-slate-50 border-t border-slate-200 px-5 py-3 flex items-center justify-between">
+              <span id="page-info" class="text-xs text-slate-500">Página 1 de 1</span>
+              <div class="flex space-x-1">
+                <button id="btn-prev-page" onclick="changePage(-1)" class="px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40" disabled>Anterior</button>
+                <button id="btn-next-page" onclick="changePage(1)" class="px-3 py-1.5 border border-slate-300 rounded text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-40" disabled>Próxima</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- 2. ABA DE ROTEIROS E LISTAS FISCAIS -->
+    <section id="view-lists" class="space-y-6 hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-bold text-slate-900">Roteiros e Listas de Fiscalização</h1>
+          <p class="text-sm text-slate-500 mt-1">Organização de empresas selecionadas para diligências em campo, notificações e auditorias.</p>
+        </div>
+        <button onclick="openCreateListModal()" class="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm transition">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Novo Roteiro Fiscal</span>
+        </button>
+      </div>
+
+      <!-- GRID COM LISTAS DISPONÍVEIS E ITENS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Coluna de Listas -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-3">
+          <h2 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Listas Cadastradas</h2>
+          <div id="saved-lists-container" class="space-y-2">
+            <!-- Renderizado via JS -->
+          </div>
+        </div>
+
+        <!-- Coluna de Detalhe da Lista Selecionada -->
+        <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+            <div>
+              <h2 id="active-list-title" class="text-base font-bold text-slate-900">Selecione uma lista ao lado</h2>
+              <p id="active-list-desc" class="text-xs text-slate-500"></p>
+            </div>
+            <button id="btn-export-list" onclick="exportActiveList()" class="hidden inline-flex items-center space-x-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-lg border border-emerald-300">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+              <span>Baixar Roteiro XLSX</span>
+            </button>
+          </div>
+          <div id="active-list-items" class="divide-y divide-slate-100 space-y-2">
+            <p class="text-xs text-slate-400 py-6 text-center">Nenhum roteiro selecionado.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. ABA DO PAINEL / DASHBOARD EXECUTIVO -->
+    <section id="view-dashboard" class="space-y-6 hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h1 class="text-xl font-bold text-slate-900">Painel Executivo de Inteligência Fiscal</h1>
+        <p class="text-sm text-slate-500 mt-1">Visão panorâmica da cobertura regulatória e quantitativos no Estado do Rio Grande do Sul.</p>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <span class="text-xs font-semibold text-slate-500 uppercase">Total Estabelecimentos RS</span>
+          <div id="kpi-total" class="text-2xl font-extrabold text-slate-900 mt-1">--</div>
+          <span class="text-[11px] text-emerald-600 font-medium">Base ativa filtrada</span>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-rose-200 shadow-sm bg-rose-50/20">
+          <span class="text-xs font-semibold text-rose-600 uppercase">Alta Relevância CFQ</span>
+          <div id="kpi-high" class="text-2xl font-extrabold text-rose-700 mt-1">--</div>
+          <span class="text-[11px] text-rose-500 font-medium">Registro obrigatório</span>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm bg-amber-50/20">
+          <span class="text-xs font-semibold text-amber-600 uppercase">Média Relevância</span>
+          <div id="kpi-med" class="text-2xl font-extrabold text-amber-700 mt-1">--</div>
+          <span class="text-[11px] text-amber-500 font-medium">Processos químicos</span>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm bg-emerald-50/20">
+          <span class="text-xs font-semibold text-emerald-700 uppercase">Empresas Ativas RFB</span>
+          <div id="kpi-active" class="text-2xl font-extrabold text-emerald-800 mt-1">--</div>
+          <span class="text-[11px] text-emerald-600 font-medium">Situação cadastral regular</span>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-indigo-200 shadow-sm bg-indigo-50/20">
+          <span class="text-xs font-semibold text-indigo-700 uppercase">Sessões Concorrentes</span>
+          <div id="kpi-sessions" class="text-2xl font-extrabold text-indigo-800 mt-1">--</div>
+          <span class="text-[11px] text-indigo-600 font-medium">Mínimo 2 acessos (TR)</span>
+        </div>
+      </div>
+
+      <!-- CHARTS SECTION -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="font-bold text-slate-800 text-sm mb-3">Distribuição por Polo / Município no RS</h3>
+          <div class="h-64"><canvas id="chartCities"></canvas></div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="font-bold text-slate-800 text-sm mb-3">Top CNAEs com Potencial Fiscalizatório</h3>
+          <div class="h-64"><canvas id="chartCnaes"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ABA DE AUDITORIA & LGPD -->
+    <section id="view-audit" class="space-y-6 hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h1 class="text-xl font-bold text-slate-900 flex items-center space-x-2">
+          <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+          <span>Trilha de Auditoria e Conformidade LGPD (Lei 13.709/2018)</span>
+        </h1>
+        <p class="text-sm text-slate-500 mt-1">Rastreabilidade completa de todas as consultas cadastrais, pesquisas de fiscais e exportações de relatórios.</p>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <table class="w-full text-left text-xs text-slate-600">
+          <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+            <tr>
+              <th class="py-3 px-4">Data / Hora</th>
+              <th class="py-3 px-3">Usuário Fiscal</th>
+              <th class="py-3 px-3">Ação Executada</th>
+              <th class="py-3 px-3">Alvo / Registro</th>
+              <th class="py-3 px-3">Endereço IP</th>
+              <th class="py-3 px-4">Detalhes</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="6" class="text-center py-6 text-slate-400">Carregando trilha de auditoria...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 5. ABA DE MANUAL & SUPORTE -->
+    <section id="view-help" class="space-y-6 hidden">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+        <div>
+          <h1 class="text-xl font-bold text-slate-900">Manual Prático de Operação e Suporte Técnico</h1>
+          <p class="text-sm text-slate-500 mt-1">Orientações de uso para os agentes fiscais do CRQ-V (atende ETP item 12.1 e TR itens 4.5 e 4.11).</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+            <div class="w-8 h-8 rounded bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center mb-3">1</div>
+            <h3 class="font-bold text-slate-800 text-sm mb-1">Como prospectar empresas</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Utilize os filtros laterais para combinar o município do RS desejado com a prioridade CFQ (Alta, Média ou Baixa). O sistema ordena automaticamente as empresas com maior probabilidade regulatória de química no topo.
+            </p>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+            <div class="w-8 h-8 rounded bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center mb-3">2</div>
+            <h3 class="font-bold text-slate-800 text-sm mb-1">Explicabilidade CFQ 339/2025</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Ao clicar em "Ver Ficha Completa", o fiscal obtém a justificativa detalhada de cada CNAE vinculado à química (tintas, saneantes, cosméticos, fertilizantes, efluentes), permitindo instruir autos e notificações com fundamentação jurídica.
+            </p>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl p-4 bg-slate-50/50">
+            <div class="w-8 h-8 rounded bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center mb-3">3</div>
+            <h3 class="font-bold text-slate-800 text-sm mb-1">Montagem de Roteiros de Campo</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Crie uma lista na aba "Roteiros Fiscais" e adicione as empresas prospectadas. Exporte a rota para planilha Excel (XLSX) com 1 clique para levar aos agentes em campo com endereços e contatos.
+            </p>
+          </div>
+        </div>
+
+        <!-- CANAL DE SUPORTE FORMAL -->
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h4 class="text-sm font-bold text-emerald-950">Central de Assistência Técnica e Suporte Contratual</h4>
+            <p class="text-xs text-emerald-800 mt-1">Canal oficial de atendimento para o CRQ-V durante toda a vigência do contrato de 12 meses (TR item 4.5):</p>
+            <div class="flex flex-wrap gap-4 mt-2 text-xs font-mono text-emerald-900">
+              <span>📧 suporte.crqvia@solucoesgov.com.br</span>
+              <span>📞 0800-051-CRQV / (51) 3000-0000</span>
+              <span>⏱️ SLA de Resposta: até 2h para falhas críticas</span>
+            </div>
+          </div>
+          <button onclick="alert('Canal de chamado de suporte acionado com sucesso! O registro foi protocolado sob o protocolo #CRQV-' + Math.floor(Math.random()*90000+10000));" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition whitespace-nowrap">
+            Abrir Chamado Técnico
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: FICHA COMPLETA DA EMPRESA -->
+  <div id="modal-company" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6">
+      <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+        <div>
+          <span id="modal-branch" class="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded">MATRIZ</span>
+          <h2 id="modal-legal-name" class="text-lg font-bold text-slate-900 mt-1">Razão Social da Empresa</h2>
+          <p id="modal-trade-name" class="text-xs text-slate-500">Nome Fantasia</p>
+          <div class="flex items-center space-x-2 mt-2">
+            <span class="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded" id="modal-cnpj">--</span>
+            <span id="modal-status-badge" class="text-xs px-2 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800">ATIVA</span>
+            <span id="modal-size-badge" class="text-xs px-2 py-0.5 rounded font-semibold bg-blue-100 text-blue-800">ME</span>
+          </div>
+        </div>
+        <button onclick="closeCompanyModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- CARD EXPLICATIVO REGULATÓRIO CFQ 339/2025 -->
+      <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-amber-900 flex items-center space-x-1.5">
+            <i data-lucide="scale" class="w-4 h-4 text-amber-700"></i>
+            <span>Enquadramento na Resolução CFQ nº 339/2025</span>
+          </span>
+          <span id="modal-score-badge" class="text-xs font-bold px-2 py-0.5 rounded bg-amber-200 text-amber-900">Score: 95/100</span>
+        </div>
+        <p id="modal-rationale" class="text-xs text-amber-800 leading-relaxed font-medium">
+          Justificativa regulatória explicável de por que esta empresa é de interesse do CRQ-V.
+        </p>
+      </div>
+
+      <!-- DADOS CADASTRAIS & LOCALIZAÇÃO -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="border border-slate-200 rounded-xl p-4 space-y-2">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Endereço e Contato (RS)</h4>
+          <p class="text-slate-600"><strong class="text-slate-700">Logradouro:</strong> <span id="modal-address">--</span></p>
+          <p class="text-slate-600"><strong class="text-slate-700">Município/UF:</strong> <span id="modal-city">--</span> - RS</p>
+          <p class="text-slate-600"><strong class="text-slate-700">CEP:</strong> <span id="modal-cep">--</span></p>
+          <p class="text-slate-600"><strong class="text-slate-700">Telefone:</strong> <span id="modal-phone">--</span></p>
+          <p class="text-slate-600"><strong class="text-slate-700">E-mail:</strong> <span id="modal-email">--</span></p>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl p-4 space-y-2">
+          <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Atividades Econômicas</h4>
+          <p class="text-slate-600"><strong class="text-slate-700">CNAE Principal:</strong> <span id="modal-primary-cnae">--</span></p>
+          <div class="mt-2">
+            <strong class="text-slate-700 block mb-1">CNAEs Secundários:</strong>
+            <ul id="modal-secondary-cnaes" class="list-disc list-inside text-slate-500 space-y-0.5 max-h-24 overflow-y-auto">
+              <li>Nenhum secundário registrado</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SITUAÇÃO NO CRQ-V & LIVE CHECK -->
+      <div class="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Situação Interna no CRQ-V</h4>
+            <p class="text-xs text-slate-500">Altere o estado de tramitação fiscal desta empresa:</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <select id="modal-crq-status-select" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-medium">
+              <option value="NAO_CADASTRADA">Não Cadastrada (Alvo)</option>
+              <option value="EM_FISCALIZACAO">Em Fiscalização</option>
+              <option value="REGISTRADA">Registrada no CRQ-V</option>
+              <option value="DISPENSADA">Dispensada</option>
+            </select>
+            <button onclick="saveCrqStatus()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+              Salvar
+            </button>
+          </div>
+        </div>
+
+        <!-- Consulta ao vivo na RFB -->
+        <div class="border-t border-slate-200 pt-3 flex items-center justify-between">
+          <div id="live-check-result" class="text-xs text-slate-500">
+            Clique ao lado para verificar a situação do CNPJ em tempo real na RFB.
+          </div>
+          <button id="btn-live-check" onclick="triggerLiveCheck()" class="inline-flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow transition whitespace-nowrap">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Consultar RFB ao Vivo</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- AÇÕES DE ROTEIRO -->
+      <div class="flex justify-end space-x-2 border-t border-slate-100 pt-4">
+        <button onclick="openAddToListModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Adicionar ao Roteiro Fiscal</span>
+        </button>
+        <button onclick="closeCompanyModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LOGIN / TROCA DE FISCAIS -->
+  <div id="modal-login" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="lock" class="w-5 h-5 text-emerald-600"></i>
+          <h3 class="font-bold text-slate-900 text-base">Autenticação de Usuário CRQ-V</h3>
+        </div>
+        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">E-mail Institucional</label>
+          <input type="email" id="login-email" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Senha de Acesso</label>
+          <input type="password" id="login-password" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 rounded-lg transition shadow">
+          Acessar Plataforma
+        </button>
+      </form>
+
+      <!-- ATALHOS RÁPIDOS PARA DEMONSTRAÇÃO DO PREGÃO -->
+      <div class="border-t border-slate-100 pt-3">
+        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Acesso Rápido de Demonstração (TR 02 Acessos):</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="fillDemoLogin('fiscal1@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2 border border-slate-200 hover:border-emerald-500 rounded-lg bg-slate-50 text-[11px] text-slate-700 transition">
+            <strong class="block text-emerald-700">Fiscal Posto 01</strong>
+            <span>fiscal1@crqv.org.br</span>
+          </button>
+          <button onclick="fillDemoLogin('fiscal2@crqv.org.br', 'crqv@fiscal2026')" class="text-left p-2 border border-slate-200 hover:border-emerald-500 rounded-lg bg-slate-50 text-[11px] text-slate-700 transition">
+            <strong class="block text-emerald-700">Fiscal Posto 02</strong>
+            <span>fiscal2@crqv.org.br</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CRIAR LISTA -->
+  <div id="modal-create-list" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+      <h3 class="font-bold text-slate-900 text-sm">Criar Novo Roteiro de Fiscalização</h3>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Nome do Roteiro / Região</label>
+        <input type="text" id="new-list-name" placeholder="Ex: Roteiro Polo Petroquímico - Setembro/2026" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Descrição / Instruções aos Fiscais</label>
+        <textarea id="new-list-desc" rows="3" placeholder="Instruções para a diligência..." class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"></textarea>
+      </div>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="closeCreateListModal()" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 rounded-lg">Cancelar</button>
+        <button onclick="submitCreateList()" class="px-3 py-1.5 text-xs text-white bg-emerald-600 rounded-lg font-semibold">Salvar Roteiro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADICIONAR EMPRESA A LISTA -->
+  <div id="modal-add-to-list" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+      <h3 class="font-bold text-slate-900 text-sm">Adicionar Empresa ao Roteiro Fiscal</h3>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Selecione o Roteiro:</label>
+        <select id="select-target-list" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"></select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Prioridade da Diligência:</label>
+        <select id="select-item-priority" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg">
+          <option value="ALTA">Alta</option>
+          <option value="MEDIA" selected>Média</option>
+          <option value="BAIXA">Baixa</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Observações do Fiscal:</label>
+        <textarea id="input-item-notes" rows="2" placeholder="Motivo da inclusão..." class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"></textarea>
+      </div>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="document.getElementById('modal-add-to-list').classList.add('hidden')" class="px-3 py-1.5 text-xs text-slate-600 bg-slate-100 rounded-lg">Cancelar</button>
+        <button onclick="submitAddItemToList()" class="px-3 py-1.5 text-xs text-white bg-emerald-600 rounded-lg font-semibold">Confirmar Inclusão</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT PRINCIPAL DA APLICAÇÃO -->
+  <script>
+    const API_BASE = window.location.origin.includes('localhost:3000') ? 'http://localhost:8000/api' : '/api';
+    let currentToken = localStorage.getItem('crqv_token') || '';
+    let currentUser = null;
+    let currentPage = 1;
+    let selectedEstablishment = null;
+    let activeListId = null;
+    let searchDebounceTimer = null;
+    let chartCitiesInstance = null;
+    let chartCnaesInstance = null;
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      if (currentToken) {
+        await checkAuth();
+      } else {
+        // Modo visitante pré-autenticado para demonstração imediata
+        await autoLoginDemo();
+      }
+      loadProspects(1);
+    });
+
+    async function autoLoginDemo() {
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email: 'fiscal1@crqv.org.br', password: 'crqv@fiscal2026' })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          currentToken = data.access_token;
+          localStorage.setItem('crqv_token', currentToken);
+          updateUserUI(data);
+        }
+      } catch (e) {
+        console.error("Auto login error:", e);
+      }
+    }
+
+    async function checkAuth() {
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (res.ok) {
+          currentUser = await res.json();
+          updateUserUI(currentUser);
+          updateSessionStats();
+        } else {
+          logout();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function updateUserUI(user) {
+      document.getElementById('user-info-box').classList.remove('hidden');
+      document.getElementById('user-info-box').classList.add('flex');
+      document.getElementById('login-top-btn').classList.add('hidden');
+      document.getElementById('user-name').innerText = user.full_name;
+      document.getElementById('user-role').innerText = user.role.toUpperCase() + ' CRQ-V';
+      lucide.createIcons();
+    }
+
+    async function updateSessionStats() {
+      if (!currentToken) return;
+      try {
+        const res = await fetch(`${API_BASE}/auth/sessions`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('sessions-count').innerText = data.active_sessions_count;
+          document.getElementById('concurrency-pill').classList.remove('hidden');
+          document.getElementById('concurrency-pill').classList.add('flex');
+        }
+      } catch(e) {}
+    }
+
+    function logout() {
+      localStorage.removeItem('crqv_token');
+      currentToken = '';
+      currentUser = null;
+      document.getElementById('user-info-box').classList.add('hidden');
+      document.getElementById('login-top-btn').classList.remove('hidden');
+      document.getElementById('concurrency-pill').classList.add('hidden');
+      openLoginModal();
+    }
+
+    function openLoginModal() {
+      document.getElementById('modal-login').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeLoginModal() {
+      document.getElementById('modal-login').classList.add('hidden');
+    }
+
+    function fillDemoLogin(email, pwd) {
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-password').value = pwd;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email, password })
+        });
+        if (!res.ok) {
+          alert('Credenciais inválidas!');
+          return;
+        }
+        const data = await res.json();
+        currentToken = data.access_token;
+        localStorage.setItem('crqv_token', currentToken);
+        updateUserUI(data);
+        closeLoginModal();
+        loadProspects(1);
+      } catch (err) {
+        alert('Erro ao conectar ao servidor.');
+      }
+    }
+
+    // NAVEGAÇÃO DE ABAS
+    function switchTab(tabId) {
+      ['prospects', 'lists', 'dashboard', 'audit', 'help'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tabId) {
+          view.classList.remove('hidden');
+          btn.classList.add('bg-slate-800', 'text-white');
+          btn.classList.remove('text-slate-300');
+        } else {
+          view.classList.add('hidden');
+          btn.classList.remove('bg-slate-800', 'text-white');
+          btn.classList.add('text-slate-300');
+        }
+      });
+      lucide.createIcons();
+
+      if (tabId === 'lists') loadSavedLists();
+      if (tabId === 'dashboard') loadDashboardStats();
+      if (tabId === 'audit') loadAuditLogs();
+    }
+
+    // BUSCA DE PROSPECTOS
+    function debounceSearch() {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        loadProspects(1);
+      }, 350);
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-q').value = '';
+      document.getElementById('filter-city').value = '';
+      document.getElementById('filter-tier').value = '';
+      document.getElementById('filter-size').value = '';
+      document.getElementById('filter-status').value = 'ATIVA';
+      document.getElementById('filter-crq').value = '';
+      document.getElementById('filter-score').value = 0;
+      document.getElementById('score-val').innerText = '0';
+      loadProspects(1);
+    }
+
+    async function loadProspects(page = 1) {
+      currentPage = page;
+      const q = document.getElementById('filter-q').value;
+      const city = document.getElementById('filter-city').value;
+      const tier = document.getElementById('filter-tier').value;
+      const size = document.getElementById('filter-size').value;
+      const status = document.getElementById('filter-status').value;
+      const crq = document.getElementById('filter-crq').value;
+      const minScore = document.getElementById('filter-score').value;
+
+      let url = `${API_BASE}/prospects?page=${page}&page_size=15`;
+      if (q) url += `&q=${encodeURIComponent(q)}`;
+      if (city) url += `&city=${encodeURIComponent(city)}`;
+      if (tier) url += `&tier=${tier}`;
+      if (size) url += `&size=${size}`;
+      if (status) url += `&status=${status}`;
+      if (crq) url += `&crq_status=${crq}`;
+      if (minScore > 0) url += `&min_score=${minScore}`;
+
+      const tbody = document.getElementById('prospects-table-body');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400">Carregando dados da base do RS...</td></tr>';
+
+      try {
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (!res.ok) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-red-500">Faça login para consultar a base de dados.</td></tr>';
+          return;
+        }
+        const data = await res.json();
+        document.getElementById('prospects-total').innerText = data.total;
+        document.getElementById('page-info').innerText = `Página ${data.page} de ${data.total_pages || 1}`;
+
+        document.getElementById('btn-prev-page').disabled = data.page <= 1;
+        document.getElementById('btn-next-page').disabled = data.page >= data.total_pages;
+
+        if (data.items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-400">Nenhuma empresa encontrada com os filtros selecionados.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.items.map(item => {
+          const formattedCnpj = item.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+          let tierBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold badge-none">Baixa</span>';
+          if (item.cfq_tier === 'HIGH') tierBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold badge-high">Alta / Obrigatório</span>';
+          if (item.cfq_tier === 'MEDIUM') tierBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold badge-medium">Média Prioridade</span>';
+
+          let crqBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-800">Não Cadastrada</span>';
+          if (item.crq_status === 'REGISTRADA') crqBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">Registrada</span>';
+          if (item.crq_status === 'EM_FISCALIZACAO') crqBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800">Em Fiscalização</span>';
+
+          return `
+            <tr class="hover:bg-slate-50/80 transition">
+              <td class="py-3 px-4">
+                <div class="font-bold text-slate-900">${item.legal_name}</div>
+                ${item.trade_name ? `<div class="text-[11px] text-slate-500">${item.trade_name}</div>` : ''}
+                <div class="text-[11px] font-mono text-slate-500 mt-0.5">${formattedCnpj} • ${item.company_size}</div>
+              </td>
+              <td class="py-3 px-3">
+                <span class="font-semibold text-slate-800">${item.city}</span>
+                <span class="text-slate-400">/RS</span>
+              </td>
+              <td class="py-3 px-3">
+                <div class="font-mono text-slate-800 font-semibold">${item.primary_cnae}</div>
+                <div class="text-[10px] text-slate-500 truncate max-w-[200px]" title="${item.primary_cnae_desc || ''}">${item.primary_cnae_desc || '--'}</div>
+              </td>
+              <td class="py-3 px-3 text-center">
+                <div class="font-black text-slate-900">${item.chemical_score.toFixed(0)}<span class="text-[10px] text-slate-400 font-normal">/100</span></div>
+                <div class="mt-0.5">${tierBadge}</div>
+              </td>
+              <td class="py-3 px-3 text-center">${crqBadge}</td>
+              <td class="py-3 px-4 text-right">
+                <button onclick="openCompanyModal('${item.cnpj}')" class="bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:border-emerald-600 transition">
+                  Ver Ficha
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        lucide.createIcons();
+      } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-red-500">Erro ao carregar dados.</td></tr>';
+      }
+    }
+
+    function changePage(delta) {
+      loadProspects(currentPage + delta);
+    }
+
+    // EXPORTAÇÕES
+    function exportData(format) {
+      const q = document.getElementById('filter-q').value;
+      const city = document.getElementById('filter-city').value;
+      const tier = document.getElementById('filter-tier').value;
+      let url = `${API_BASE}/exports/prospects.${format}?`;
+      if (q) url += `q=${encodeURIComponent(q)}&`;
+      if (city) url += `city=${encodeURIComponent(city)}&`;
+      if (tier) url += `tier=${tier}&`;
+
+      // Trigger download via auth fetch
+      fetch(url, { headers: { 'Authorization': `Bearer ${currentToken}` } })
+        .then(res => res.blob())
+        .then(blob => {
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `prospeccao_crqv_rs.${format}`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        });
+    }
+
+    // MODAL DE FICHA DA EMPRESA
+    async function openCompanyModal(cnpj) {
+      try {
+        const res = await fetch(`${API_BASE}/prospects/${cnpj}`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (!res.ok) return alert('Erro ao carregar ficha da empresa');
+        const est = await res.json();
+        selectedEstablishment = est;
+
+        const formattedCnpj = est.cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+        document.getElementById('modal-legal-name').innerText = est.legal_name;
+        document.getElementById('modal-trade-name').innerText = est.trade_name || 'Sem Nome Fantasia cadastrado';
+        document.getElementById('modal-cnpj').innerText = formattedCnpj;
+        document.getElementById('modal-branch').innerText = est.branch_type;
+        document.getElementById('modal-status-badge').innerText = est.registration_status;
+        document.getElementById('modal-size-badge').innerText = est.company_size;
+
+        document.getElementById('modal-score-badge').innerText = `Score Químico: ${est.chemical_score.toFixed(0)}/100 (${est.cfq_tier})`;
+        document.getElementById('modal-rationale').innerText = est.cfq_rationale || 'Atividade conforme Resolução CFQ 339/2025.';
+
+        document.getElementById('modal-address').innerText = `${est.street || 'Logradouro não informado'}, ${est.number || 'S/N'} - ${est.district || ''}`;
+        document.getElementById('modal-city').innerText = est.city;
+        document.getElementById('modal-cep').innerText = est.postal_code || '--';
+        document.getElementById('modal-phone').innerText = est.phone || '--';
+        document.getElementById('modal-email').innerText = est.email || '--';
+
+        document.getElementById('modal-primary-cnae').innerText = `${est.primary_cnae} - ${est.primary_cnae_desc || ''}`;
+        const secList = document.getElementById('modal-secondary-cnaes');
+        if (est.secondary_cnaes && est.secondary_cnaes.length > 0) {
+          secList.innerHTML = est.secondary_cnaes.map(c => `<li>${c}</li>`).join('');
+        } else {
+          secList.innerHTML = '<li>Nenhum CNAE secundário registrado</li>';
+        }
+
+        document.getElementById('modal-crq-status-select').value = est.crq_status;
+        document.getElementById('live-check-result').innerHTML = 'Situação na base interna: <strong>' + est.registration_status + '</strong>. Clique ao lado para consulta em tempo real.';
+
+        document.getElementById('modal-company').classList.remove('hidden');
+        lucide.createIcons();
+      } catch(e) {
+        alert('Falha ao obter dados.');
+      }
+    }
+
+    function closeCompanyModal() {
+      document.getElementById('modal-company').classList.add('hidden');
+    }
+
+    async function triggerLiveCheck() {
+      if (!selectedEstablishment) return;
+      const btn = document.getElementById('btn-live-check');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="animate-spin">⌛</span> Consultando RFB...';
+
+      try {
+        const res = await fetch(`${API_BASE}/prospects/${selectedEstablishment.cnpj}/live-check`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const data = await res.json();
+        document.getElementById('live-check-result').innerHTML = `
+          <div class="text-emerald-700 font-semibold">✓ Consulta Oficial em Tempo Real Concluída:</div>
+          <div>Status: <strong class="text-slate-800">${data.registration_status}</strong> • Fonte: ${data.source}</div>
+          <div class="text-[10px] text-slate-400">Verificado às: ${new Date(data.checked_at).toLocaleTimeString('pt-BR')}</div>
+        `;
+      } catch (e) {
+        document.getElementById('live-check-result').innerHTML = '<span class="text-red-500">Erro na consulta ao vivo.</span>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>Consultar RFB ao Vivo</span>';
+        lucide.createIcons();
+      }
+    }
+
+    async function saveCrqStatus() {
+      if (!selectedEstablishment) return;
+      const newStatus = document.getElementById('modal-crq-status-select').value;
+      try {
+        const res = await fetch(`${API_BASE}/prospects/${selectedEstablishment.cnpj}/crq-status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({ crq_status: newStatus })
+        });
+        if (res.ok) {
+          alert('Situação cadastral no CRQ-V atualizada com sucesso!');
+          loadProspects(currentPage);
+        }
+      } catch(e) {
+        alert('Erro ao salvar.');
+      }
+    }
+
+    // GESTÃO DE LISTAS / ROTEIROS
+    async function loadSavedLists() {
+      try {
+        const res = await fetch(`${API_BASE}/lists`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (!res.ok) return;
+        const lists = await res.json();
+        const container = document.getElementById('saved-lists-container');
+        if (lists.length === 0) {
+          container.innerHTML = '<p class="text-xs text-slate-400 py-3">Nenhum roteiro cadastrado.</p>';
+          return;
+        }
+
+        container.innerHTML = lists.map(l => `
+          <div onclick="selectActiveList(${l.id}, '${l.name}', '${l.description || ''}')" class="p-3 border border-slate-200 hover:border-emerald-500 rounded-xl cursor-pointer bg-slate-50/50 hover:bg-emerald-50/20 transition ${activeListId === l.id ? 'border-emerald-600 bg-emerald-50/40' : ''}">
+            <div class="font-bold text-slate-800 text-xs">${l.name}</div>
+            <div class="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>${l.items_count} empresa(s) incluída(s)</span>
+              <span class="text-emerald-700 font-medium">Ver detalhes →</span>
+            </div>
+          </div>
+        `).join('');
+
+        if (lists.length > 0 && !activeListId) {
+          selectActiveList(lists[0].id, lists[0].name, lists[0].description || '');
+        }
+      } catch(e) {}
+    }
+
+    async function selectActiveList(listId, name, desc) {
+      activeListId = listId;
+      document.getElementById('active-list-title').innerText = name;
+      document.getElementById('active-list-desc').innerText = desc;
+      document.getElementById('btn-export-list').classList.remove('hidden');
+
+      loadSavedLists(); // Atualiza highlight
+
+      try {
+        const res = await fetch(`${API_BASE}/lists/${listId}/items`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const items = await res.json();
+        const container = document.getElementById('active-list-items');
+        if (items.length === 0) {
+          container.innerHTML = '<p class="text-xs text-slate-400 py-6 text-center">Nenhuma empresa adicionada a este roteiro ainda.</p>';
+          return;
+        }
+
+        container.innerHTML = items.map(item => {
+          const est = item.establishment;
+          return `
+            <div class="p-3 flex items-center justify-between hover:bg-slate-50 transition rounded-lg">
+              <div>
+                <div class="font-bold text-slate-800 text-xs">${est ? est.legal_name : 'Empresa ID ' + item.establishment_id}</div>
+                <div class="text-[11px] text-slate-500">${est ? est.city + ' • CNAE: ' + est.primary_cnae : ''}</div>
+                ${item.notes ? `<div class="text-[11px] text-amber-700 mt-0.5">Nota: ${item.notes}</div>` : ''}
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">${item.fiscal_status}</span>
+                <button onclick="removeListItem(${listId}, ${item.id})" class="text-red-500 hover:text-red-700 p-1 text-xs">Excluir</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch(e) {}
+    }
+
+    async function removeListItem(listId, itemId) {
+      if (!confirm('Deseja remover esta empresa do roteiro?')) return;
+      try {
+        await fetch(`${API_BASE}/lists/${listId}/items/${itemId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        selectActiveList(activeListId, document.getElementById('active-list-title').innerText, document.getElementById('active-list-desc').innerText);
+        loadSavedLists();
+      } catch(e) {}
+    }
+
+    function exportActiveList() {
+      if (!activeListId) return;
+      fetch(`${API_BASE}/exports/lists/${activeListId}.xlsx`, {
+        headers: { 'Authorization': `Bearer ${currentToken}` }
+      })
+      .then(res => res.blob())
+      .then(blob => {
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `roteiro_fiscalizacao_${activeListId}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+    }
+
+    function openCreateListModal() {
+      document.getElementById('modal-create-list').classList.remove('hidden');
+    }
+    function closeCreateListModal() {
+      document.getElementById('modal-create-list').classList.add('hidden');
+    }
+
+    async function submitCreateList() {
+      const name = document.getElementById('new-list-name').value;
+      const description = document.getElementById('new-list-desc').value;
+      if (!name) return alert('Informe o nome da lista');
+
+      try {
+        const res = await fetch(`${API_BASE}/lists`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({ name, description })
+        });
+        if (res.ok) {
+          closeCreateListModal();
+          loadSavedLists();
+        }
+      } catch(e) {}
+    }
+
+    async function openAddToListModal() {
+      if (!selectedEstablishment) return;
+      try {
+        const res = await fetch(`${API_BASE}/lists`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        const lists = await res.json();
+        const select = document.getElementById('select-target-list');
+        select.innerHTML = lists.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+        document.getElementById('modal-add-to-list').classList.remove('hidden');
+      } catch(e) {}
+    }
+
+    async function submitAddItemToList() {
+      const listId = document.getElementById('select-target-list').value;
+      const priority = document.getElementById('select-item-priority').value;
+      const notes = document.getElementById('input-item-notes').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/lists/${listId}/items`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentToken}`
+          },
+          body: JSON.stringify({
+            establishment_id: selectedEstablishment.id,
+            priority,
+            notes
+          })
+        });
+        if (res.ok) {
+          alert('Empresa adicionada ao roteiro com sucesso!');
+          document.getElementById('modal-add-to-list').classList.add('hidden');
+        } else {
+          const err = await res.json();
+          alert(err.detail || 'Erro ao adicionar empresa');
+        }
+      } catch(e) {
+        alert('Erro de conexão');
+      }
+    }
+
+    // DASHBOARD & CHARTS
+    async function loadDashboardStats() {
+      try {
+        const res = await fetch(`${API_BASE}/stats/dashboard`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        document.getElementById('kpi-total').innerText = data.total_establishments_rs;
+        document.getElementById('kpi-high').innerText = data.total_high_priority;
+        document.getElementById('kpi-med').innerText = data.total_medium_priority;
+        document.getElementById('kpi-active').innerText = data.active_companies;
+        document.getElementById('kpi-sessions').innerText = data.active_concurrent_sessions;
+
+        // Chart Cidades
+        const ctxCities = document.getElementById('chartCities').getContext('2d');
+        if (chartCitiesInstance) chartCitiesInstance.destroy();
+        chartCitiesInstance = new Chart(ctxCities, {
+          type: 'bar',
+          data: {
+            labels: data.by_city.map(c => c.label),
+            datasets: [{
+              label: 'Empresas no RS',
+              data: data.by_city.map(c => c.count),
+              backgroundColor: '#059669',
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+
+        // Chart CNAEs
+        const ctxCnaes = document.getElementById('chartCnaes').getContext('2d');
+        if (chartCnaesInstance) chartCnaesInstance.destroy();
+        chartCnaesInstance = new Chart(ctxCnaes, {
+          type: 'doughnut',
+          data: {
+            labels: data.by_cnae.map(c => c.label),
+            datasets: [{
+              data: data.by_cnae.map(c => c.count),
+              backgroundColor: ['#047857', '#0d9488', '#0284c7', '#d97706', '#dc2626', '#64748b']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+
+      } catch(e) {}
+    }
+
+    // AUDITORIA LGPD
+    async function loadAuditLogs() {
+      try {
+        const res = await fetch(`${API_BASE}/audit`, {
+          headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
+        if (!res.ok) return;
+        const logs = await res.json();
+        const tbody = document.getElementById('audit-table-body');
+        tbody.innerHTML = logs.map(l => `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 px-4 font-mono text-[11px] text-slate-500">${new Date(l.created_at).toLocaleString('pt-BR')}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-800">${l.user_email || 'anônimo'}</td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${l.action}</span></td>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600">${l.target_id || l.target_type || '--'}</td>
+            <td class="py-2.5 px-3 font-mono text-[11px] text-slate-500">${l.ip_address}</td>
+            <td class="py-2.5 px-4 text-[11px] text-slate-500 truncate max-w-[200px]">${l.details ? JSON.stringify(l.details) : '--'}</td>
+          </tr>
+        `).join('');
+      } catch(e) {}
+    }
+  </script>
+</body>
+</html>

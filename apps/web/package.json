@@ -1,0 +1,19 @@
+{
+  "name": "crq-v-ia-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend da Plataforma CRQ-V-IA para Prospecção Fiscal Inteligente",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "npx serve dist -l 3000"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.4",
+    "lucide": "^0.439.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.2"
+  }
+}
