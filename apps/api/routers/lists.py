@@ -225,3 +225,31 @@ def remove_item(
     db.delete(item)
     db.commit()
     return {"success": True, "removed_item_id": item_id}
+
+@router.delete("/{list_id}")
+def delete_list(
+    list_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    saved_list = db.query(SavedList).filter(SavedList.id == list_id).first()
+    if not saved_list:
+        raise HTTPException(status_code=404, detail="Lista não encontrada")
+    
+    db.query(SavedListItem).filter(SavedListItem.list_id == list_id).delete()
+    db.delete(saved_list)
+    db.commit()
+
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    record_audit(
+        db=db,
+        action="DELETE_SAVED_LIST",
+        user=current_user,
+        target_type="SAVED_LIST",
+        target_id=str(list_id),
+        details={"name": saved_list.name},
+        ip_address=client_ip
+    )
+
+    return {"success": True, "deleted_list_id": list_id}

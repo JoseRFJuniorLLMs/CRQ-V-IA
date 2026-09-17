@@ -204,3 +204,227 @@ def test_paginated_users_and_audit():
     assert a_data["total"] > 0
     assert len(a_data["items"]) <= 5
     assert a_data["page"] == 1
+
+def test_login_web2ajax_admin():
+    """Valida autenticação do usuário master admin web2ajax@gmail.com."""
+    response = client.post("/api/auth/login", json={
+        "email": "web2ajax@gmail.com",
+        "password": "debian23"
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == "web2ajax@gmail.com"
+    assert data["role"] == "admin"
+    assert "access_token" in data
+
+def test_all_individual_prospect_filters():
+    """Testa individualmente cada parâmetro de busca e filtro da API de prospects."""
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Busca textual por Razão Social
+    r_q_name = client.get("/api/prospects?q=Tintas", headers=headers)
+    assert r_q_name.status_code == 200
+    assert r_q_name.json()["total"] > 0
+
+    # 2. Busca textual por CNPJ (sem formatação)
+    r_q_cnpj = client.get("/api/prospects?q=92754738000180", headers=headers)
+    assert r_q_cnpj.status_code == 200
+    assert r_q_cnpj.json()["total"] == 1
+    assert r_q_cnpj.json()["items"][0]["cnpj"] == "92754738000180"
+
+    # 3. Busca por CNAE Primário
+    r_cnae = client.get("/api/prospects?cnae=2021", headers=headers)
+    assert r_cnae.status_code == 200
+    assert r_cnae.json()["total"] > 0
+
+    # 4. Busca por Divisão Econômica (2 dígitos)
+    r_div = client.get("/api/prospects?division=20", headers=headers)
+    assert r_div.status_code == 200
+    assert r_div.json()["total"] > 0
+    assert len(r_div.json()["items"]) > 0
+
+    # 5. Filtro por Município (RS)
+    r_city = client.get("/api/prospects?city=Triunfo", headers=headers)
+    assert r_city.status_code == 200
+    assert r_city.json()["total"] > 0
+    assert all(i["city"] == "Triunfo" for i in r_city.json()["items"])
+
+    # 6. Filtro por Bairro/Distrito
+    r_dist = client.get("/api/prospects?district=Navegantes", headers=headers)
+    assert r_dist.status_code == 200
+    assert r_dist.json()["total"] > 0
+    assert any("Navegantes" in (i["district"] or "") for i in r_dist.json()["items"])
+
+    # 7. Filtro por Tipo de Estabelecimento (MATRIZ e FILIAL)
+    r_matriz = client.get("/api/prospects?branch_type=MATRIZ", headers=headers)
+    assert r_matriz.status_code == 200
+    assert all(i["branch_type"] == "MATRIZ" for i in r_matriz.json()["items"])
+
+    r_filial = client.get("/api/prospects?branch_type=FILIAL", headers=headers)
+    assert r_filial.status_code == 200
+    assert all(i["branch_type"] == "FILIAL" for i in r_filial.json()["items"])
+
+    # 8. Filtro por Porte Empresarial
+    r_me = client.get("/api/prospects?size=ME", headers=headers)
+    assert r_me.status_code == 200
+    assert all(i["company_size"] == "ME" for i in r_me.json()["items"])
+
+    r_demais = client.get("/api/prospects?size=DEMAIS", headers=headers)
+    assert r_demais.status_code == 200
+    assert all(i["company_size"] == "DEMAIS" for i in r_demais.json()["items"])
+
+    # 9. Filtro por Situação Cadastral RFB
+    r_ativa = client.get("/api/prospects?status=ATIVA", headers=headers)
+    assert r_ativa.status_code == 200
+    assert all(i["registration_status"] == "ATIVA" for i in r_ativa.json()["items"])
+
+    r_baixada = client.get("/api/prospects?status=BAIXADA", headers=headers)
+    assert r_baixada.status_code == 200
+    assert all(i["registration_status"] == "BAIXADA" for i in r_baixada.json()["items"])
+
+    # 10. Filtro por Situação Interna no CRQ-V
+    r_crq_alvo = client.get("/api/prospects?crq_status=NAO_CADASTRADA", headers=headers)
+    assert r_crq_alvo.status_code == 200
+    assert all(i["crq_status"] == "NAO_CADASTRADA" for i in r_crq_alvo.json()["items"])
+
+    r_crq_fisc = client.get("/api/prospects?crq_status=EM_FISCALIZACAO", headers=headers)
+    assert r_crq_fisc.status_code == 200
+    assert all(i["crq_status"] == "EM_FISCALIZACAO" for i in r_crq_fisc.json()["items"])
+
+    # 11. Filtro por Score Químico Mínimo
+    r_score = client.get("/api/prospects?min_score=85", headers=headers)
+    assert r_score.status_code == 200
+    assert all(i["chemical_score"] >= 85.0 for i in r_score.json()["items"])
+
+    # 12. Filtro por Capital Social Mínimo
+    r_cap = client.get("/api/prospects?min_capital=1000000", headers=headers)
+    assert r_cap.status_code == 200
+    assert all(i["capital_social"] >= 1000000.0 for i in r_cap.json()["items"])
+
+def test_combined_multi_criteria_query():
+    """Testa consulta combinando múltiplos filtros simultâneos."""
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    url = "/api/prospects?city=Triunfo&division=20&tier=HIGH&status=ATIVA&branch_type=MATRIZ&min_score=80"
+    resp = client.get(url, headers=headers)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total"] > 0
+    for item in data["items"]:
+        assert item["city"] == "Triunfo"
+        assert item["primary_cnae"].startswith("20")
+        assert item["cfq_tier"] == "HIGH"
+        assert item["registration_status"] == "ATIVA"
+        assert item["branch_type"] == "MATRIZ"
+        assert item["chemical_score"] >= 80.0
+
+def test_prospects_pagination_and_limits():
+    """Testa paginação rigorosa com limites e navegação entre páginas."""
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Página 1 com 3 itens
+    r1 = client.get("/api/prospects?page=1&page_size=3", headers=headers)
+    assert r1.status_code == 200
+    d1 = r1.json()
+    assert len(d1["items"]) == 3
+    assert d1["page"] == 1
+    assert d1["page_size"] == 3
+
+    # Página 2 com 3 itens
+    r2 = client.get("/api/prospects?page=2&page_size=3", headers=headers)
+    assert r2.status_code == 200
+    d2 = r2.json()
+    assert len(d2["items"]) == 3
+    assert d2["page"] == 2
+
+    # Itens da página 1 devem ser distintos da página 2
+    p1_cnpjs = {i["cnpj"] for i in d1["items"]}
+    p2_cnpjs = {i["cnpj"] for i in d2["items"]}
+    assert p1_cnpjs.isdisjoint(p2_cnpjs)
+
+def test_crq_status_mutation_flow():
+    """Testa atualização de situação de fiscalização (PATCH) e persistência no banco."""
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    cnpj = "92754738000180"
+    # Altera para EM_FISCALIZACAO com observações
+    patch_resp = client.patch(f"/api/prospects/{cnpj}/crq-status", json={
+        "crq_status": "EM_FISCALIZACAO",
+        "crq_notes": "Notificação expedida para vistoria in loco"
+    }, headers=headers)
+    assert patch_resp.status_code == 200
+    assert patch_resp.json()["crq_status"] == "EM_FISCALIZACAO"
+
+    # Confirma persistência no GET da ficha detalhada
+    detail_resp = client.get(f"/api/prospects/{cnpj}", headers=headers)
+    assert detail_resp.status_code == 200
+    assert detail_resp.json()["crq_status"] == "EM_FISCALIZACAO"
+    assert detail_resp.json()["crq_notes"] == "Notificação expedida para vistoria in loco"
+
+def test_saved_lists_complete_lifecycle():
+    """Testa ciclo completo de listas: criação, adição de empresa, consulta paginada e remoção."""
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Cria lista
+    create_list = client.post("/api/lists", json={
+        "name": "Roteiro Operacional Canoas/Esteio",
+        "description": "Diligências programadas"
+    }, headers=headers)
+    assert create_list.status_code == 200
+    list_id = create_list.json()["id"]
+
+    # 2. Busca um prospect para obter id
+    prospect_resp = client.get("/api/prospects?page=1&page_size=1", headers=headers)
+    est_id = prospect_resp.json()["items"][0]["id"]
+
+    # 3. Adiciona item à lista
+    add_item = client.post(f"/api/lists/{list_id}/items", json={
+        "establishment_id": est_id,
+        "priority": "ALTA",
+        "notes": "Verificar responsável técnico in loco"
+    }, headers=headers)
+    assert add_item.status_code == 200
+    item_id = add_item.json()["id"]
+
+    # 4. Consulta itens paginados da lista
+    items_resp = client.get(f"/api/lists/{list_id}/items?page=1&page_size=5", headers=headers)
+    assert items_resp.status_code == 200
+    items_data = items_resp.json()
+    assert items_data["total"] >= 1
+    assert any(i["id"] == item_id for i in items_data["items"])
+
+    # 5. Remove item da lista
+    del_item = client.delete(f"/api/lists/{list_id}/items/{item_id}", headers=headers)
+    assert del_item.status_code == 200
+
+    # 6. Exclui lista
+    del_list = client.delete(f"/api/lists/{list_id}", headers=headers)
+    assert del_list.status_code == 200
+
+def test_exports_with_specific_filters():
+    """Testa exportação CSV e XLSX aplicando filtros de consulta."""
+    login_resp = client.post("/api/auth/login", json={"email": "fiscal1@crqv.org.br", "password": "crqv@fiscal2026"})
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # CSV com filtro de cidade
+    csv_resp = client.get("/api/exports/prospects.csv?city=Porto Alegre", headers=headers)
+    assert csv_resp.status_code == 200
+    assert "Porto Alegre" in csv_resp.text
+
+    # XLSX com filtro de prioridade HIGH
+    xlsx_resp = client.get("/api/exports/prospects.xlsx?tier=HIGH", headers=headers)
+    assert xlsx_resp.status_code == 200
+    assert len(xlsx_resp.content) > 1000
+
+
